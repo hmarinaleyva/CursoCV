@@ -44,33 +44,32 @@ git clone https://github.com/CimttGit/CursoCV.git
 py -m pip install --user virtualenv
 ```
 
-Crear entorno virtual `VirtualCV` dentro de la carpeta del repositorio clonado `CursoCV`. 
+Crear entorno virtual `VirtualTest` dentro de la carpeta del repositorio clonado `CursoCV`. 
 
 ```
-virtualenv VirtualCV
-.\VirtualCV\Scripts\activate
+virtualenv VirtualTest
+.\VirtualTest\Scripts\activate
 ```
 
 Para desactivar el entorno virtual use el comando `deactivate`.
 
 ### 3. Instalar requerimientos
 
-Instalar paquetes en el entorno virtual `VirtualCV`.
+Instalar paquetes en el entorno virtual `VirtualTest`.
 
 ```
 pip install mediapipe
-pip install easyocr
 ```
 
-Con el comando `pip freeze` podemos ver los paquetes instalados en nuestro virtual `VirtualCV`.
+Con el comando `pip freeze` podemos ver los paquetes instalados en nuestro virtual `VirtualTest`.
 
 ### 4. Verificar la instalación
 
 Para verificar que se haya instalado correctamente el entorno virtual y que se haya instalado correctamente los paquetes hacemos correr el script `Test.py` con los siguientes comandos:
 
 ```
-cd ~/Desktop/CIMTT/CursosCIMTT/
-& ./VirtualCV/Scripts/python.exe ./Scripts/Test.py
+cd ~\Desktop\CursosCIMTT\
+ & .\VirtualTest\Scripts\python.exe .\CursoCV\Scripts\Test.py
 ```
 ![](https://i.imgur.com/VDtsdU2.gif)
 
