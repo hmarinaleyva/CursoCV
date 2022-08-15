@@ -41,26 +41,17 @@ git clone https://github.com/CimttGit/CursoCV.git
 [Instalar virtualenv usando pip](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) para administrar paquetes de Python para diferentes proyectos. (Se recomienda instalar [python3.8.3](https://www.python.org/downloads/release/python-383/))
 
 ```
-py -m pip install --upgrade pip
 py -m pip install --user virtualenv
 ```
 
-Crear entorno virtual `VirtualCV` dentro de la carpeta principal de nuestro proyecto. Para activar y desactivar el entorno virtual ejecute los archivos `activate.bat` y `desactivate.bat` que se encuentran en la carpeta creada `.\test\Scripts`.
-
-```
-mkdir ~\Desktop\ProjectCV
-cd ~\Desktop\ProjectCV
-```
-
+Crear entorno virtual `VirtualCV` dentro de la carpeta del repositoro clonado `CursoCV`. 
 
 ```
 virtualenv VirtualCV
 .\VirtualCV\Scripts\activate
 ```
 
-```
-git clone https://github.com/CimttGit/CursoCV.git
-```
+Para desacticar el entorno virtual use el comando `deactivate`.
 
 4. Instalar paquetes en el entorno virtual `VirtualCV`.
 ```
