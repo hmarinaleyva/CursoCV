@@ -1,10 +1,6 @@
 # Curso CIMTT - Computer Vision
 
-Encargado:  Nicolás Ibáñez 
-
-E-mail:     nicolas.ibanez.r@usach.cl
-
-[NicoGitSoft](https://github.com/NicoGitSoft)
+E-mail: cursos.cimtt@gmail.com
 
 ## Guía de installación en Windows
 
