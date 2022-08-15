@@ -19,9 +19,21 @@ Get-ExecutionPolicy -List
 ```
 
 Instalar Git
-
 ```
 winget install --id Git.Git -e --source winget
+```
+
+Crear en una capteta local `CursosCIMTT` para almacenar el repocitorio del curso CIMTT.
+
+```
+mkdir ~\Desktop\CursosCIMTT
+cd ~\Desktop\CursosCIMTT
+
+```
+Clonar repositorio en la carpeta local.
+
+```
+git clone https://github.com/CimttGit/CursoCV.git
 ```
 
 ### 2. Instalación de requerimientos de programación
