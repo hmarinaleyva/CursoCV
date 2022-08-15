@@ -72,7 +72,7 @@ Para verificar que se haya instalado correctamente el entorno virtual y que se h
 cd ~/Desktop/CIMTT/CursosCIMTT/
 & ./VirtualCV/Scripts/python.exe ./Scripts/Test.py
 ```
-![](https://i.imgur.com/y2rYSgk.gif)
+![](https://i.imgur.com/VDtsdU2.gif)
 
 ## Ilustraciónes de instalación manual de programas requeridos en Windows
 ### Installación de [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
