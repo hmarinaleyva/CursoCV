@@ -46,9 +46,8 @@ virtualenv VirtualCV
 .\VirtualCV\Scripts\activate
 ```
 
-4. Instalar paquetes en el entorno virtual `test`.
+4. Instalar paquetes en el entorno virtual `VirtualCV`.
 ```
-py -m pip install --upgrade pip
 pip install mediapipe
 pip install easyocr
 ```
