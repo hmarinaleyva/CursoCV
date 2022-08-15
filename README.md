@@ -1,12 +1,13 @@
 # Cursos CIMTT
 
-## Curso de Visión Artificial
-
 #### Cuenta cursos.cimtt@gmail.com
 ![](https://i.imgur.com/SOyQBhn.png)
 
 #### Cuenta [GitHub](https://github.com/)
 ![](https://i.imgur.com/gEL1AIV.png)
+
+## Curso de Visión Artificial
+
 
 ## Guía de installación en Windows
 
