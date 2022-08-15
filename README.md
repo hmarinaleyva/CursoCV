@@ -37,11 +37,15 @@ py -m pip install --user virtualenv
 3. Crear entorno virtual `test` dentro de la carpeta principal de nuestro proyecto. Para activar y desactivar el entorno virtual ejecute los archivos `activate.bat` y `desactivate.bat` que se encuentran en la carpeta creada `.\test\Scripts`.
 
 ```
-mkdir ProjectCV
-cd .\ProjectCV\
-py -m venv test
-.\test\Scripts\activate
+mkdir ~\Desktop\ProjectCV
+cd ~\Desktop\ProjectCV
 ```
+
+```
+virtualenv VirtualCV
+.\VirtualCV\Scripts\activate
+```
+
 4. Instalar paquetes en el entorno virtual `test`.
 ```
 py -m pip install --upgrade pip
