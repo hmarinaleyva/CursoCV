@@ -16,7 +16,6 @@ Get-ExecutionPolicy -List
 
 ```
 winget install --id Git.Git -e --source winget
-
 ```
 2. Crear repositorio local para el proyecto de visión artificial mediante [Git](https://git-scm.com/).
 
@@ -33,9 +32,14 @@ mkdir ~\Desktop\ProjectCV
 cd ~\Desktop\ProjectCV
 ```
 
+
 ```
 virtualenv VirtualCV
 .\VirtualCV\Scripts\activate
+```
+
+```
+git clone https://github.com/CimttGit/CursoCV.git
 ```
 
 4. Instalar paquetes en el entorno virtual `VirtualCV`.
