@@ -22,6 +22,7 @@ Get-ExecutionPolicy -List
 winget install --id Git.Git -e --source winget
 git config --global user.name CimttGit
 git config --global user.email cursos.cimtt@gmail.com
+git config --list
 ```
 2. Crear repositorio local para el proyecto de visión artificial mediante [Git](https://git-scm.com/).
 
