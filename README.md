@@ -74,9 +74,6 @@ cd ~/Desktop/CIMTT/CursosCIMTT/
 ```
 ![](https://i.imgur.com/VDtsdU2.gif)
 
-![](https://i.imgur.com/FpaOmnB.gif)
-
-
 ## Ilustraciónes de instalación manual de programas requeridos en Windows
 ### Installación de [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
 ![](https://i.imgur.com/5tfa7up.png)
