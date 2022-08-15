@@ -2,7 +2,7 @@
 
 E-mail: cursos.cimtt@gmail.com
 
-## Guía de installación en Windows
+## Guía de instalación en Windows
 
 ### 1. Instalación de [Git](https://git-scm.com/)
 
@@ -23,7 +23,7 @@ Instalar Git
 winget install --id Git.Git -e --source winget
 ```
 
-Crear en una capteta local `CursosCIMTT` para almacenar el repocitorio del curso CIMTT.
+Crear en una carpeta local `CursosCIMTT` para almacenar el repositorio del curso CIMTT.
 
 ```
 mkdir ~\Desktop\CursosCIMTT
@@ -44,14 +44,14 @@ git clone https://github.com/CimttGit/CursoCV.git
 py -m pip install --user virtualenv
 ```
 
-Crear entorno virtual `VirtualCV` dentro de la carpeta del repositoro clonado `CursoCV`. 
+Crear entorno virtual `VirtualCV` dentro de la carpeta del repositorio clonado `CursoCV`. 
 
 ```
 virtualenv VirtualCV
 .\VirtualCV\Scripts\activate
 ```
 
-Para desacticar el entorno virtual use el comando `deactivate`.
+Para desactivar el entorno virtual use el comando `deactivate`.
 
 ### 3. Instalar requerimientos
 
@@ -66,7 +66,7 @@ Con el comando `pip freeze` podemos ver los paquetes instalados en nuestro virtu
 
 ### 4. Verificar la instalación
 
-Para verificar que se haya instalado correctamente el entorno virtual y que se haya instalado correctamente los paquetes hacemos correr el scrit `Test.py` con los siguientes comandos:
+Para verificar que se haya instalado correctamente el entorno virtual y que se haya instalado correctamente los paquetes hacemos correr el script `Test.py` con los siguientes comandos:
 
 ```
 cd ~/Desktop/CIMTT/CursosCIMTT/
@@ -74,8 +74,8 @@ cd ~/Desktop/CIMTT/CursosCIMTT/
 ```
 ![](https://i.imgur.com/VDtsdU2.gif)
 
-## Ilustraciónes de instalación manual de programas requeridos en Windows
-### Installación de [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
+## Ilustraciones de instalación manual de programas requeridos en Windows
+### Instalación de [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
 ![](https://i.imgur.com/5tfa7up.png)
 ![](https://i.imgur.com/0Nqe6mK.png)
 ![](https://i.imgur.com/gbNHnJL.png)
@@ -86,14 +86,14 @@ cd ~/Desktop/CIMTT/CursosCIMTT/
 ![](https://i.imgur.com/lEygfaJ.png)
 ![](https://i.imgur.com/UNsMgHQ.png)
 
-#### Installación de [Python 3.7.0](https://www.python.org/downloads/release/python-370/)
+#### Instalación de [Python 3.7.0](https://www.python.org/downloads/release/python-370/)
 ![](https://i.imgur.com/uXoiysa.png)
 ![](https://i.imgur.com/1vPWl7H.png)
 ![](https://i.imgur.com/qbUFs15.png)
 ![](https://i.imgur.com/GKTVXrr.png)
 ![](https://i.imgur.com/UtamXxG.png)
 
-### Installación de [git](https://git-scm.com/download/win)
+### Instalación de [git](https://git-scm.com/download/win)
 ![](https://i.imgur.com/PRnouTE.png)
 ![](https://i.imgur.com/Ulm0K9I.png)
 ![](https://i.imgur.com/kqXFfrO.png)
