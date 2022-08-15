@@ -62,6 +62,17 @@ pip install mediapipe
 pip install easyocr
 ```
 
+Con el comando `pip freeze` podemos ver los paquetes instalados en nuestro virtual `VirtualCV`.
+
+### 4. Verificar la instalación
+
+Para verificar que se haya instalado correctamente el entorno virtual y que se haya instalado correctamente los paquetes hacemos correr el scrit `Test.py` con los siguientes comandos:
+
+```
+cd ~/Desktop/CIMTT/CursosCIMTT/
+& ./VirtualCV/Scripts/python.exe ./Scripts/Test.py
+```
+
 ## Ilustraciónes de instalación manual de programas requeridos en Windows
 ### Installación de [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
 ![](https://i.imgur.com/5tfa7up.png)
@@ -104,27 +115,3 @@ git config --global credential.helper store
 git config --list
 ```
 ![](https://i.imgur.com/sR7fT1E.png)
-
-
-
-
-```
-git clone https://github.com/NicoGitSoft/BVI.git
-```
-![](https://i.imgur.com/vk6HpnL.png)
-
-
-```
-python -m pip install --user virtualenv
-mkdir ProjectCV
-cd .\ProjectCV\
-virtualenv --system-site-packages -p python3 ./venv
-.\venv\Scripts\activate
-set PATH=%PATH%;C:\Users\USER\AppData\Roaming\Python\Python38\Scripts
-
-```
-
-```
-python -m pip install -U wheel setuptools
-pip install mediapipe
-```
