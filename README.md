@@ -2,30 +2,38 @@
 
 E-mail: cursos.cimtt@gmail.com
 
-### Guía de installación en Windows
+## Guía de installación en Windows
 
-#### Configuración para empezar
-###### Usando PowerShell
+### 1. Instalación de [Git](https://git-scm.com/)
 
-1. Cambiar la [directiva de ejecución](https://docs.microsoft.com/es-es/powershell/module/microsoft.powershell.core/about/about_execution_policies) de PowerShell en el equipo Windows usando el comando `Set-ExecutionPolicy`.
+ Cambiar la [directiva de ejecución](https://docs.microsoft.com/es-es/powershell/module/microsoft.powershell.core/about/about_execution_policies) de PowerShell en el equipo Windows usando el comando `Set-ExecutionPolicy`.
+
 ```
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+Verificar cambios de la directiva de ejecución.
+
+```
 Get-ExecutionPolicy -List
 ```
-2. Instalar y configurar [Git](https://git-scm.com/). En este caso se configura Git con la cuenta GitHub `CimttGit`. 
+
+Instalar Git
 
 ```
 winget install --id Git.Git -e --source winget
 ```
-2. Crear repositorio local para el proyecto de visión artificial mediante [Git](https://git-scm.com/).
 
-2. [Instalar virtualenv usando pip](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) para administrar paquetes de Python para diferentes proyectos. (Se recomienda instalar [python3.7.0](https://www.python.org/downloads/release/python-370/))
+### 2. Instalación de requerimientos de programación
+
+[Instalar virtualenv usando pip](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) para administrar paquetes de Python para diferentes proyectos. (Se recomienda instalar [python3.8.3](https://www.python.org/downloads/release/python-383/))
+
 ```
 py -m pip install --upgrade pip
 py -m pip install --user virtualenv
 ```
 
-3. Crear entorno virtual `test` dentro de la carpeta principal de nuestro proyecto. Para activar y desactivar el entorno virtual ejecute los archivos `activate.bat` y `desactivate.bat` que se encuentran en la carpeta creada `.\test\Scripts`.
+Crear entorno virtual `VirtualCV` dentro de la carpeta principal de nuestro proyecto. Para activar y desactivar el entorno virtual ejecute los archivos `activate.bat` y `desactivate.bat` que se encuentran en la carpeta creada `.\test\Scripts`.
 
 ```
 mkdir ~\Desktop\ProjectCV
