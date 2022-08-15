@@ -1,12 +1,6 @@
-# Cursos CIMTT
+# Curso CIMTT - Computer Vision
 
-#### Cuenta cursos.cimtt@gmail.com
-![](https://i.imgur.com/SOyQBhn.png)
-
-#### Cuenta [GitHub](https://github.com/)
-![](https://i.imgur.com/gEL1AIV.png)
-
-## Curso de Visión Artificial
+E-mail: cursos.cimtt@gmail.com
 
 ### Guía de installación en Windows
 
@@ -22,9 +16,6 @@ Get-ExecutionPolicy -List
 
 ```
 winget install --id Git.Git -e --source winget
-git config --global user.name CimttGit
-git config --global user.email cursos.cimtt@gmail.com
-git config --list
 ```
 2. Crear repositorio local para el proyecto de visión artificial mediante [Git](https://git-scm.com/).
 
@@ -37,14 +28,22 @@ py -m pip install --user virtualenv
 3. Crear entorno virtual `test` dentro de la carpeta principal de nuestro proyecto. Para activar y desactivar el entorno virtual ejecute los archivos `activate.bat` y `desactivate.bat` que se encuentran en la carpeta creada `.\test\Scripts`.
 
 ```
-mkdir ProjectCV
-cd .\ProjectCV\
-py -m venv test
-.\test\Scripts\activate
+mkdir ~\Desktop\ProjectCV
+cd ~\Desktop\ProjectCV
 ```
-4. Instalar paquetes en el entorno virtual `test`.
+
+
 ```
-py -m pip install --upgrade pip
+virtualenv VirtualCV
+.\VirtualCV\Scripts\activate
+```
+
+```
+git clone https://github.com/CimttGit/CursoCV.git
+```
+
+4. Instalar paquetes en el entorno virtual `VirtualCV`.
+```
 pip install mediapipe
 pip install easyocr
 ```
