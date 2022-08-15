@@ -69,7 +69,7 @@ Para verificar que se haya instalado correctamente el entorno virtual y que se h
 
 ```
 cd ~\Desktop\CursosCIMTT\
- & .\VirtualTest\Scripts\python.exe .\CursoCV\Scripts\Test.py
+& .\VirtualTest\Scripts\python.exe .\CursoCV\Scripts\Test.py
 ```
 ![](https://i.imgur.com/VDtsdU2.gif)
 
