@@ -36,7 +36,7 @@ Clonar repositorio en la carpeta local.
 git clone https://github.com/CimttGit/CursoCV.git
 ```
 
-### 2. Instalación de requerimientos de programación
+### 2. Crear entorno de programación
 
 [Instalar virtualenv usando pip](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) para administrar paquetes de Python para diferentes proyectos. (Se recomienda instalar [python3.8.3](https://www.python.org/downloads/release/python-383/))
 
@@ -53,20 +53,33 @@ virtualenv VirtualCV
 
 Para desacticar el entorno virtual use el comando `deactivate`.
 
-4. Instalar paquetes en el entorno virtual `VirtualCV`.
+### 3. Instalar requerimientos
+
+Instalar paquetes en el entorno virtual `VirtualCV`.
+
 ```
 pip install mediapipe
 pip install easyocr
 ```
 
-#### Instalación de programas y requerimientos
+## Ilustraciónes de instalación manual de programas requeridos en Windows
+### Installación de [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
+![](https://i.imgur.com/5tfa7up.png)
+![](https://i.imgur.com/0Nqe6mK.png)
+![](https://i.imgur.com/gbNHnJL.png)
+![](https://i.imgur.com/8r1sDFY.png)
+![](https://i.imgur.com/T7t1Ht1.png)
+![](https://i.imgur.com/qviXMLc.png)
+
+![](https://i.imgur.com/lEygfaJ.png)
+![](https://i.imgur.com/UNsMgHQ.png)
+
 #### Installación de [Python 3.7.0](https://www.python.org/downloads/release/python-370/)
 ![](https://i.imgur.com/uXoiysa.png)
 ![](https://i.imgur.com/1vPWl7H.png)
 ![](https://i.imgur.com/qbUFs15.png)
 ![](https://i.imgur.com/GKTVXrr.png)
 ![](https://i.imgur.com/UtamXxG.png)
-
 
 ### Installación de [git](https://git-scm.com/download/win)
 ![](https://i.imgur.com/PRnouTE.png)
@@ -93,16 +106,7 @@ git config --list
 ![](https://i.imgur.com/sR7fT1E.png)
 
 
-### Installación de [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
-![](https://i.imgur.com/5tfa7up.png)
-![](https://i.imgur.com/0Nqe6mK.png)
-![](https://i.imgur.com/gbNHnJL.png)
-![](https://i.imgur.com/8r1sDFY.png)
-![](https://i.imgur.com/T7t1Ht1.png)
-![](https://i.imgur.com/qviXMLc.png)
 
-![](https://i.imgur.com/lEygfaJ.png)
-![](https://i.imgur.com/UNsMgHQ.png)
 
 ```
 git clone https://github.com/NicoGitSoft/BVI.git
