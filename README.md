@@ -8,7 +8,6 @@
 
 ## Curso de Visión Artificial
 
-
 ## Guía de installación en Windows
 
 ### Configuración para empezar
