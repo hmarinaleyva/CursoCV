@@ -8,9 +8,9 @@
 
 ## Curso de Visión Artificial
 
-## Guía de installación en Windows
+### Guía de installación en Windows
 
-### Configuración para empezar
+#### Configuración para empezar
 ###### Usando PowerShell
 
 1. Cambiar la [directiva de ejecución](https://docs.microsoft.com/es-es/powershell/module/microsoft.powershell.core/about/about_execution_policies) de PowerShell en el equipo Windows usando el comando `Set-ExecutionPolicy`.
@@ -49,7 +49,7 @@ pip install mediapipe
 pip install easyocr
 ```
 
-### Instalación de programas y requerimientos
+#### Instalación de programas y requerimientos
 #### Installación de [Python 3.7.0](https://www.python.org/downloads/release/python-370/)
 ![](https://i.imgur.com/uXoiysa.png)
 ![](https://i.imgur.com/1vPWl7H.png)
