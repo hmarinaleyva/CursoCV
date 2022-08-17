@@ -28,15 +28,15 @@ Crear en una carpeta local `CursosCIMTT` para almacenar el repositorio del curso
 ```
 mkdir ~\Desktop\CursosCIMTT
 cd ~\Desktop\CursosCIMTT
-
 ```
+
 Clonar repositorio en la carpeta local.
 
 ```
 git clone https://github.com/CimttGit/CursoCV.git
 ```
 
-### 2. Crear entorno de programación
+### 2. Crear un entorno de programación
 
 [Instalar virtualenv usando pip](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) para administrar paquetes de Python para diferentes proyectos. (Se recomienda instalar [python3.8.3](https://www.python.org/downloads/release/python-383/))
 
@@ -53,7 +53,7 @@ virtualenv VirtualTest
 
 Para desactivar el entorno virtual use el comando `deactivate`.
 
-### 3. Instalar requerimientos
+### 3. Instalar requerimientos para el entorno virtual
 
 Instalar paquetes en el entorno virtual `VirtualTest`.
 
@@ -72,6 +72,23 @@ cd ~\Desktop\CursosCIMTT\
 & .\VirtualTest\Scripts\python.exe .\CursoCV\Scripts\Test.py
 ```
 ![](https://i.imgur.com/VDtsdU2.gif)
+
+### 5. Instalación de arduino-cli para Raspbian
+Acesando
+```
+sudo apt update && upgrade -y
+curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+PATH=$PATH:/home/CursoCV/bin
+sudo reboot
+```
+
+### 6. Crear un sketch de arduino-cli para Raspbian
+Acesando
+```
+arduino-cli config init
+arduino-cli sketch new test
+nano ~/test/test.ino
+```
 
 ## Ilustraciones de instalación manual de programas requeridos en Windows
 ### Instalación de [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
