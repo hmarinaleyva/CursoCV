@@ -1,4 +1,4 @@
-# Curso CIMTT - Computer Vision
+# Curso CIMTT - Visión Artificial y Accionamiento Remoto
 
 E-mail: cursos.cimtt@gmail.com
 
