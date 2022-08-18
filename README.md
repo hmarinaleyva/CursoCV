@@ -73,8 +73,24 @@ cd ~\Desktop\CursosCIMTT\
 ```
 ![](https://i.imgur.com/VDtsdU2.gif)
 
-### 5. Instalación de arduino-cli para Raspbian
-Acesando
+## Guía de instalación de requerimientos en Raspbian (Raspberry Pi OS)
+### 1. Instalación de depthia para Raspbian
+Instalación de depthia en el sistema opetativo través de PyPi:
+```
+sudo curl -fL https://docs.luxonis.com/install_dependencies.sh | bash
+```
+Instalación de depthia en el sistema opetativo través de PyPi:
+```
+python3 -m pip install depthai
+```
+clonar reppositorios asosiados a depthia:
+```
+git clone https://github.com/luxonis/depthai.git
+git clone https://github.com/luxonis/depthai-python.git
+```
+
+git clone https://github.com/luxonis/depthai-python.git
+### 2. Instalación de arduino-cli y depthia para Raspbian
 ```
 sudo apt update && upgrade -y
 curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
