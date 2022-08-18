@@ -134,8 +134,8 @@ Con el comando `pip freeze` podemos ver los paquetes instalados en nuestro virtu
 Para verificar que se haya instalado correctamente el entorno virtual y que se haya instalado correctamente los paquetes hacemos correr el script `Test.py` con los siguientes comandos:
 
 ```
-cd ~\Desktop\CursosCIMTT\
-& .\VirtualTest\Scripts\python.exe .\CursoCV\Scripts\Test.py
+cd ~/Desktop/CursosCIMTT/
+& ./VirtualTest/Scripts/python.exe ./CursoCV/Scripts/Test.py
 ```
 
 git clone https://github.com/luxonis/depthai-python.git
