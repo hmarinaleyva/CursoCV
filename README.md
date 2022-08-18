@@ -98,13 +98,14 @@ PATH=$PATH:/home/CursoCV/bin
 sudo reboot
 ```
 
-### 6. Crear un sketch de arduino-cli para Raspbian
-Acesando
+### 2. Crear un sketch de arduino-cli para accionamiento desde Raspbian 
+
 ```
 arduino-cli config init
 arduino-cli sketch new test
 nano ~/test/test.ino
 ```
+### 3. Accionar sketch con Visión Artificial
 
 ## Ilustraciones de instalación manual de programas requeridos en Windows
 ### Instalación de [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
