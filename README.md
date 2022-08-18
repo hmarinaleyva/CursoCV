@@ -114,7 +114,7 @@ Crear entorno virtual `VirtualTest` dentro de la carpeta del repositorio clonado
 
 ```
 virtualenv VirtualTest
-./VirtualTest/Scripts/activate
+source ./VirtualTest/bin/activate
 ```
 
 Para desactivar el entorno virtual use el comando `deactivate`.
