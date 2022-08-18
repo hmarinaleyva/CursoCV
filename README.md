@@ -23,7 +23,7 @@ Instalar Git
 winget install --id Git.Git -e --source winget
 ```
 
-Crear en una carpeta local `CursosCIMTT` para almacenar el repositorio del curso CIMTT.
+Crear en una carpeta local `CursosCIMTT` en el escritorio para almacenar el repositorio del curso CIMTT.
 
 ```
 mkdir ~\Desktop\CursosCIMTT
@@ -87,6 +87,55 @@ clonar reppositorios asosiados a depthia:
 ```
 git clone https://github.com/luxonis/depthai.git
 git clone https://github.com/luxonis/depthai-python.git
+```
+
+Crear en una carpeta local `CursosCIMTT` en el escritorio para almacenar el repositorio del curso CIMTT.
+
+```
+mkdir ~/Desktop/CursosCIMTT
+cd ~/Desktop/CursosCIMTT
+```
+
+Clonar repositorio del curso de visión artificial en la carpeta local.
+
+```
+git clone https://github.com/CimttGit/CursoCV.git
+```
+
+### 2. Crear un entorno de programación
+
+[Instalar virtualenv usando pip](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) para administrar paquetes de Python para diferentes proyectos. (Se recomienda instalar [python3.8.3](https://www.python.org/downloads/release/python-383/))
+
+```
+python3 -m pip install --user virtualenv
+```
+
+Crear entorno virtual `VirtualTest` dentro de la carpeta del repositorio clonado `CursoCV`. 
+
+```
+virtualenv VirtualTest
+./VirtualTest/Scripts/activate
+```
+
+Para desactivar el entorno virtual use el comando `deactivate`.
+
+### 3. Instalar requerimientos para el entorno virtual
+
+Instalar paquetes en el entorno virtual `VirtualTest`.
+
+```
+pip install mediapipe
+```
+
+Con el comando `pip freeze` podemos ver los paquetes instalados en nuestro virtual `VirtualTest`.
+
+### 4. Verificar la instalación
+
+Para verificar que se haya instalado correctamente el entorno virtual y que se haya instalado correctamente los paquetes hacemos correr el script `Test.py` con los siguientes comandos:
+
+```
+cd ~\Desktop\CursosCIMTT\
+& .\VirtualTest\Scripts\python.exe .\CursoCV\Scripts\Test.py
 ```
 
 git clone https://github.com/luxonis/depthai-python.git
