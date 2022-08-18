@@ -135,12 +135,14 @@ Para verificar que se haya instalado correctamente el entorno virtual y que se h
 
 ```
 cd ~/Desktop/CursosCIMTT/
-& ./VirtualTest/Scripts/python.exe ./CursoCV/Scripts/Test.py
+./VirtualTest/bin/python ./CursoCV/Scripts/Test.py
 ```
 
-git clone https://github.com/luxonis/depthai-python.git
-### 2. Instalación de arduino-cli y depthia para Raspbian
+## Instalación de arduino-cli y depthia para Raspbian
+
 ```
+cd ~/
+git clone https://github.com/luxonis/depthai-python.git
 sudo apt update && upgrade -y
 curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
 PATH=$PATH:/home/CursoCV/bin
