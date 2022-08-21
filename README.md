@@ -74,8 +74,19 @@ cd ~\Desktop\CursosCIMTT\
 ![](https://i.imgur.com/VDtsdU2.gif)
 
 ## Guía de instalación de requerimientos en Raspbian (Raspberry Pi OS)
+
+### 1. Instalación de mediapipe para RaspberryPi
+
+```
+sudo apt install ffmpeg python3-opencv python3-pip libxcb-shm0 libcdio-paranoia-dev libsdl2-2.0-0 libxv1  libtheora0 libva-drm2 libva-x11-2 libvdpau1 libharfbuzz0b libbluray2 libatlas-base-dev libhdf5-103 libgtk-3-0 libdc1394-22 libopenexr23
+```
+
+```
+sudo pip3 install mediapipe-rpi3
+```
+
 ### 1. Instalación de depthia para Raspbian
-Instalación de depthia en el sistema opetativo través de PyPi:
+Instalación de dependencias depthia en el sistema opetativo través de PyPi:
 ```
 sudo curl -fL https://docs.luxonis.com/install_dependencies.sh | bash
 ```
