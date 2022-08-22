@@ -44,14 +44,14 @@ git clone https://github.com/CimttGit/CursoCV.git
 py -m pip install --user virtualenv
 ```
 
-Crear entorno virtual `VirtualTest` dentro de la carpeta del repositorio clonado `CursoCV`. 
+Crear entorno virtual `VirtualTest` dentro de la carpeta `CursosCIMTT` junto a la carpeta del repositorio clonado `CursoCV`. 
 
 ```
 virtualenv VirtualTest
 .\VirtualTest\Scripts\activate
 ```
 
-**NOTA:** Para desactivar el entorno virtual use el comando `deactivate`.
+**NOTA:** Para desactivar el entorno virtual (`VirtualTest`) use el comando `deactivate`.
 
 ### 3. Instalar requerimientos para el entorno virtual
 
@@ -88,25 +88,38 @@ sudo apt install \
 Instalar el paquete de mediapipe para RaspberryPi
 
 Para RaspberryPi 3 instalar el paquete [mediapipe-rpi3 mediante PyPI](https://pypi.org/project/mediapipe-rpi4/)
+
 ```
 sudo pip3 install mediapipe-rpi3
 ```
 
-### 1. Instalación de depthia para Raspbian
-Instalación de dependencias depthia en el sistema opetativo través de PyPi:
+Para RaspberryPi 4 instalar el paquete [mediapipe-rpi4 mediante PyPI](https://pypi.org/project/mediapipe-rpi4/)
+
+```
+sudo pip3 install mediapipe-rpi4
+```
+
+### 2. Instalación de depthia para Raspbian (para sensores de profundidad)
+Instalar las dependencias depthia en el sistema opetativo
+
 ```
 sudo curl -fL https://docs.luxonis.com/install_dependencies.sh | bash
 ```
-Instalación de depthia en el sistema opetativo través de PyPi:
+
+Instalar de depthia a través de PyPi:
+
 ```
 python3 -m pip install depthai
 ```
-clonar reppositorios asosiados a depthia:
+
+Clonar reppositorios asosiados a depthia
+
 ```
 git clone https://github.com/luxonis/depthai.git
 git clone https://github.com/luxonis/depthai-python.git
 ```
 
+3. Crear un entorno de programación
 Crear en una carpeta local `CursosCIMTT` en el escritorio para almacenar el repositorio del curso CIMTT.
 
 ```
@@ -120,9 +133,8 @@ Clonar repositorio del curso de visión artificial en la carpeta local.
 git clone https://github.com/CimttGit/CursoCV.git
 ```
 
-### 2. Crear un entorno de programación
 
-[Instalar virtualenv usando pip](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) para administrar paquetes de Python para diferentes proyectos. (Se recomienda instalar [python3.8.3](https://www.python.org/downloads/release/python-383/))
+Instalar [virtualenv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) en rasbian usando pip para administrar paquetes de Python para diferentes proyectos.
 
 ```
 python3 -m pip install --user virtualenv
