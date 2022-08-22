@@ -112,11 +112,17 @@ Instalar de depthia a través de PyPi:
 python3 -m pip install depthai
 ```
 
-Clonar reppositorios asosiados a depthia
+Clonar repositorios asosiados a depthia
 
 ```
 git clone https://github.com/luxonis/depthai.git
 git clone https://github.com/luxonis/depthai-python.git
+```
+
+Clonar otros repositorios de interés inteligencia artificial
+
+```
+git clone https://github.com/geaxgx/depthai_hand_tracker.git
 ```
 
 3. Crear un entorno de programación
@@ -134,7 +140,7 @@ git clone https://github.com/CimttGit/CursoCV.git
 ```
 
 
-Instalar [virtualenv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) en rasbian usando pip para administrar paquetes de Python para diferentes proyectos.
+Instalar [virtualenv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) en Raspbian usando pip para administrar paquetes de Python para diferentes proyectos.
 
 ```
 python3 -m pip install --user virtualenv
@@ -147,11 +153,11 @@ virtualenv VirtualTest
 source ./VirtualTest/bin/activate
 ```
 
-Para desactivar el entorno virtual use el comando `deactivate`.
+Para desactivar el entorno virtual (`VirtualTest`) use el comando `deactivate`.
 
-### 3. Instalar requerimientos para el entorno virtual
+### 3. Provisionar entorno virtual
 
-Instalar paquetes en el entorno virtual `VirtualTest`.
+Instalar paquetes dentro del entorno virtual `VirtualTest`.
 
 ```
 pip install mediapipe
@@ -168,25 +174,42 @@ cd ~/Desktop/CursosCIMTT/
 ./VirtualTest/bin/python ./CursoCV/Scripts/Test.py
 ```
 
-## Instalación de arduino-cli y depthia para Raspbian
+## 5. Instalación de arduino-cli para Raspbian
 
 ```
-cd ~/
-git clone https://github.com/luxonis/depthai-python.git
-sudo apt update && upgrade -y
 curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
-PATH=$PATH:/home/CursoCV/bin
+PATH=$PATH:/home/pi/bin
 sudo reboot
 ```
 
-### 2. Crear un sketch de arduino-cli para accionamiento desde Raspbian 
+### 2. Crear un sketch usando arduino-cli desde Raspbian
 
 ```
 arduino-cli config init
-arduino-cli sketch new test
-nano ~/test/test.ino
+arduino-cli sketch new ~/Desktop/CursosCIMTT/CursoCV/Scripts/ArduinoTest
+nano ~/Desktop/CursosCIMTT/CursoCV/Scripts/ArduinoTest/ArduinoTest.ino
 ```
-### 3. Accionar sketch con Visión Artificial
+
+### 3. Editar sketch arduino
+
+Usando nano editor:
+```
+nano ~/Desktop/CursosCIMTT/CursoCV/Scripts/ArduinoTest/ArduinoTest.ino
+```
+
+En primera instancia, se visualizara el archivo creado de la siguiente manera:
+
+```
+void setup() {
+}
+
+void loop() {
+}
+```	
+
+
+
+
 
 ## Ilustraciones de instalación manual de programas requeridos en Windows
 ### Instalación de [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
