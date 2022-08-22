@@ -76,9 +76,14 @@ cd ~\Desktop\CursosCIMTT\
 ## Guía de instalación de requerimientos en Raspbian (Raspberry Pi OS)
 
 ### 1. Instalación de mediapipe para RaspberryPi
+
 Instalar dependencias
 ```
-sudo apt install ffmpeg python3-opencv python3-pip libxcb-shm0 libcdio-paranoia-dev libsdl2-2.0-0 libxv1  libtheora0 libva-drm2 libva-x11-2 libvdpau1 libharfbuzz0b libbluray2 libatlas-base-dev libhdf5-103 libgtk-3-0 libdc1394-22 libopenexr23
+sudo apt install \
+    ffmpeg python3-opencv python3-pip libxcb-shm0 \
+    libcdio-paranoia-dev libsdl2-2.0-0 libxv1 libtheora0 libva-drm2 \
+    libva-x11-2 libvdpau1 libharfbuzz0b libbluray2 libatlas-base-dev \
+    libhdf5-103 libgtk-3-0 libdc1394-22 libopenexr23
 ```
 Instalar el paquete [mediapipe-rpi3 mediante PyPI](https://pypi.org/project/mediapipe-rpi4/)
 ```
