@@ -205,8 +205,16 @@ void setup() {
 
 void loop() {
 }
-```	
+```
+En este caso, modificar el archivo para que contenga el siguiente código:
 
+```
+void setup() {
+}
+
+void loop() {
+}
+```
 
 
 
