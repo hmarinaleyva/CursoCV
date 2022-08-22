@@ -85,7 +85,9 @@ sudo apt install \
     libva-x11-2 libvdpau1 libharfbuzz0b libbluray2 libatlas-base-dev \
     libhdf5-103 libgtk-3-0 libdc1394-22 libopenexr23
 ```
-Instalar el paquete [mediapipe-rpi3 mediante PyPI](https://pypi.org/project/mediapipe-rpi4/)
+Instalar el paquete de mediapipe para RaspberryPi
+
+Para RaspberryPi 3 instalar el paquete [mediapipe-rpi3 mediante PyPI](https://pypi.org/project/mediapipe-rpi4/)
 ```
 sudo pip3 install mediapipe-rpi3
 ```
