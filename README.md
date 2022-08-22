@@ -206,18 +206,28 @@ void setup() {
 void loop() {
 }
 ```
-En este caso, modificar el archivo para que contenga el siguiente código:
 
-```
-void setup() {
-}
+En este caso, modificar el archivo para que contenga el siguiente código de modo que se suene un BUZZER conectado al PIN 11 de un arduinio conectado a la Raspberry Pi. (Véase pin-out de un Arduino UNO R3 [aquí](https://elosciloscopio.com/wp-content/uploads/2021/03/Tutorial-de-Arduino-Uno-Pinout.png) ).
 
-void loop() {
-}
-```
+<pre>
+<font color="#5e6d03">#define</font> <font color="#000000">PIN_BUZZER</font> <font color="#000000">11</font> <font color="#434f54">&#47;&#47; Definir el pin de salida del BUZZER</font>
+<font color="#00979c">void</font> <font color="#5e6d03">setup</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; Inicializar el buzzer</font>
+ &nbsp;&nbsp;&nbsp;<font color="#d35400">pinMode</font><font color="#000000">(</font><font color="#000000">PIN_BUZZER</font><font color="#434f54">,</font> <font color="#00979c">OUTPUT</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<font color="#d35400">digitalWrite</font><font color="#000000">(</font><font color="#000000">PIN_BUZZER</font><font color="#434f54">,</font> <font color="#00979c">LOW</font><font color="#000000">)</font><font color="#000000">;</font>
+<font color="#000000">}</font>
 
-
-
+<font color="#00979c">void</font> <font color="#5e6d03">loop</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; Hacer sonar el buzzer con una frecuencia de 440Hz (Nota A4) y duración de 1 segundo (1000 milisegundos)</font>
+ &nbsp;&nbsp;&nbsp;<font color="#d35400">tone</font><font color="#000000">(</font><font color="#000000">PIN_BUZZER</font><font color="#434f54">,</font> <font color="#000000">440</font><font color="#434f54">,</font> <font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; Esperar media segundo</font>
+ &nbsp;&nbsp;&nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">500</font><font color="#000000">)</font><font color="#000000">;</font> &nbsp;&nbsp;&nbsp;&nbsp;
+ &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; Hacer sonar el buzzer con una frecuencia de 880Hz (Nota B4) y duración de 1 segundo</font>
+ &nbsp;&nbsp;&nbsp;<font color="#d35400">tone</font><font color="#000000">(</font><font color="#000000">PIN_BUZZER</font><font color="#434f54">,</font> <font color="#000000">880</font><font color="#434f54">,</font> <font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; detener loop de sonido con un buble infinito vacío</font>
+ &nbsp;&nbsp;&nbsp;<font color="#5e6d03">while</font><font color="#000000">(</font><font color="#000000">1</font><font color="#000000">)</font><font color="#000000">{</font> <font color="#000000">}</font>
+<font color="#000000">}</font>
+</pre>
 
 ## Ilustraciones de instalación manual de programas requeridos en Windows
 ### Instalación de [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
