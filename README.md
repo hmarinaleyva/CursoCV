@@ -1,4 +1,5 @@
-# Curso CIMTT - Visión Artificial y Accionamiento Remoto
+# Curso CIMTT - Visión Artificial y accionamiento remoto
+![](https://i.imgur.com/juUG1xu.png)
 
 E-mail: cursos.cimtt@gmail.com
 
@@ -103,7 +104,13 @@ sudo pip3 install mediapipe-rpi4
 Instalar las dependencias depthia en el sistema opetativo
 
 ```
+sudo apt install curl
 sudo curl -fL https://docs.luxonis.com/install_dependencies.sh | bash
+```
+Reglas USB
+```
+echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' | sudo tee /etc/udev/rules.d/80-movidius.rules
+sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 
 Instalar de depthia a través de PyPi:
