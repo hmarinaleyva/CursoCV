@@ -193,15 +193,15 @@ sudo reboot
 
 ```
 arduino-cli config init
-arduino-cli sketch new ~/Desktop/CursosCIMTT/CursoCV/Scripts/ArduinoTest
-nano ~/Desktop/CursosCIMTT/CursoCV/Scripts/ArduinoTest/ArduinoTest.ino
+arduino-cli sketch new ~/Desktop/CursosCIMTT/CursoCV/Scripts/Arduino/ArduinoTest
+nano ~/Desktop/CursosCIMTT/CursoCV/Scripts/Arduino/ArduinoTest/ArduinoTest.ino
 ```
 
 ### 3. Editar sketch arduino
 
 Usando nano editor:
 ```
-nano ~/Desktop/CursosCIMTT/CursoCV/Scripts/ArduinoTest/ArduinoTest.ino
+nano ~/Desktop/CursosCIMTT/CursoCV/Scripts/Arduino/ArduinoTest/ArduinoTest.ino
 ```
 
 En primera instancia, se visualizara el archivo creado de la siguiente manera:
@@ -217,7 +217,7 @@ void loop() {
 En este caso, modificar el archivo para que contenga el siguiente código de modo que se suene un BUZZER conectado al PIN 11 de un arduinio conectado a la Raspberry Pi. (Véase pin-out de un Arduino UNO R3 [aquí](https://elosciloscopio.com/wp-content/uploads/2021/03/Tutorial-de-Arduino-Uno-Pinout.png) ).
 
 <pre>
-<font color="#5e6d03">#define</font> <font color="#000000">PIN_BUZZER</font> <font color="#000000">11</font> <font color="#434f54">&#47;&#47; Definir el pin de salida del BUZZER</font>
+<font color="#5e6d03">#define</font> <font color="#000000">PIN_BUZZER</font> <font color="#000000">12</font> <font color="#434f54">&#47;&#47; Definir el pin de salida del BUZZER</font>
 <font color="#00979c">void</font> <font color="#5e6d03">setup</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
  &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; Inicializar el buzzer</font>
  &nbsp;&nbsp;&nbsp;<font color="#d35400">pinMode</font><font color="#000000">(</font><font color="#000000">PIN_BUZZER</font><font color="#434f54">,</font> <font color="#00979c">OUTPUT</font><font color="#000000">)</font><font color="#000000">;</font>
@@ -235,6 +235,26 @@ En este caso, modificar el archivo para que contenga el siguiente código de mod
  &nbsp;&nbsp;&nbsp;<font color="#5e6d03">while</font><font color="#000000">(</font><font color="#000000">1</font><font color="#000000">)</font><font color="#000000">{</font> <font color="#000000">}</font>
 <font color="#000000">}</font>
 </pre>
+
+Luego, compilar el código desde la carpeta contenedora de proyectos `Arduino`
+
+```
+cd ~/Desktop/CursosCIMTT/CursoCV/Scripts/Arduino
+arduino-cli compile --fqbn arduino:avr:mega ./ArduinoTest
+```
+
+y finalmente subir el skech
+
+```
+arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:mega ./ArduinoTest
+```
+
+Nota: en linux se se otorgan los permidod al puerto ttyACM0 para poder subir el skech
+
+```
+ls /dev/ttyACM0
+sudo chmod a+rw /dev/ttyACM0
+```
 
 ## Ilustraciones de instalación manual de programas requeridos en Windows
 ### Instalación de [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
