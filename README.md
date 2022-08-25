@@ -256,6 +256,12 @@ ls /dev/ttyACM0
 sudo chmod a+rw /dev/ttyACM0
 ```
 
+Para ejecutar desde un script python
+```
+import os
+os.system('arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:mega ~/Desktop/CursosCIMTT/CursoCV/Scripts/Arduino/ArduinoTest')
+```
+
 ## Ilustraciones de instalación manual de programas requeridos en Windows
 ### Instalación de [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
 ![](https://i.imgur.com/5tfa7up.png)
