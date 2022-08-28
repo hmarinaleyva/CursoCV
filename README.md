@@ -268,10 +268,17 @@ ls /dev/ttyACM0
 sudo chmod a+rw /dev/ttyACM0
 ```
 
-Para ejecutar desde un script python
+Para ejecutar desde un script python para compilar y subir un skech para una placa Arduino Uno conectada al puerto `/dev/ttyACM0`
+
 ```
 import os
-os.system('arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:mega ~/Desktop/CursosCIMTT/CursoCV/Scripts/Arduino/ArduinoTest')
+
+MainDir = os.path.dirname(os.path.abspath(__file__))
+ArduinoSketchDir = os.path.join(MainDir, '.', 'Arduino/ArduinoTest')
+
+os.chdir(ArduinoSketchDir)
+os.system("arduino-cli compile --fqbn arduino:avr:uno")
+os.system("arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:uno")
 ```
 
 ## Ilustraciones de instalación manual de programas requeridos en Windows
