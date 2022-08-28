@@ -69,6 +69,8 @@ while cap.isOpened():
         if not PrevFingerDetect:
             # Escribir en el centro de la del fotograma la palabra "HAND DETECTED"
             cv2.putText(frame, "HAND DETECTED", (int(width/2), int(height/2)), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+            # Enviar mensaje al Arduino para que suere el BUZZER mediante comunicación serial
+            
             PrevFingerDetect = True
         
         fingertips = fingertips_positions(results_hands)                    # position points of fingertips detected
