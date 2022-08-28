@@ -70,7 +70,7 @@ while cap.isOpened():
             # Escribir en el centro de la del fotograma la palabra "HAND DETECTED"
             cv2.putText(frame, "HAND DETECTED", (int(width/2), int(height/2)), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
             # Enviar mensaje al Arduino para que suere el BUZZER mediante comunicación serial
-            
+
             PrevFingerDetect = True
         
         fingertips = fingertips_positions(results_hands)                    # position points of fingertips detected
@@ -87,45 +87,6 @@ while cap.isOpened():
     # Flip the frame horizontally for a selfie-view display.
     cv2.imshow('manitos y cara', frame) #cv2.flip(frame, 1))
 
-    if cv2.waitKey(5) & 0xFF == 27:
-        break
-cap.release()
-
-
-while cap.isOpened():
-    success, frame = cap.read()
-    if not success:
-        print("Ignoring empty camera frame.")
-        # If loading a video, use 'break' instead of 'continue'.
-        continue
-
-    # To improve performance, optionally mark the frame as not writeable to
-    # pass by reference.
-    frame.flags.writeable = False
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-    # Draw the face mesh annotations on the frame.
-    frame.flags.writeable = True
-    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-
-    results_hands = hands.process(frame)            # process frame with hands object
-    
-    # check if hand is detected
-    if results_hands.multi_hand_landmarks is not None:
-        
-        fingertips = fingertips_positions(results_hands)                    # position points of fingertips detected
-        fingertips_labels = ["0", "1", "2", "3", "4"]
-        index_position = fingertips[1]                                      # position of index finger
-        thumb_position = fingertips[0]                                      # position of thumb finger
-        draw_detected_objects(frame, fingertips_labels, fingertips)         # draw dots and labels at the fingertip position on the frame            
-        #if abs(index_position[0]-thumb_position[0])+abs(index_position[1]-thumb_position[1]) < delta_x+delta_y:
-        #    draw_line(frame, index_position, thumb_position, (255,0,0))
-        #else:
-        #    draw_line(frame, index_position, thumb_position, (0,0,255))
-
-
-    # Flip the frame horizontally for a selfie-view display.
-    cv2.imshow('MediaPipe Face Mesh', cv2.flip(frame, 1))
     if cv2.waitKey(5) & 0xFF == 27:
         break
 cap.release()
