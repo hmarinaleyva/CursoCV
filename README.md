@@ -236,7 +236,7 @@ En este caso, modificar el archivo para que contenga el siguiente código de mod
 <font color="#000000">}</font>
 </pre>
 
-Luego, compilar el código desde la carpeta contenedora de proyectos `Arduino`
+Luego, compilar el código desde la carpeta contenedora de proyectos `Arduino` para un arduino mega
 
 ```
 cd ~/Desktop/CursosCIMTT/CursoCV/Scripts/Arduino
