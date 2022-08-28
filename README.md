@@ -236,6 +236,12 @@ En este caso, modificar el archivo para que contenga el siguiente código de mod
 <font color="#000000">}</font>
 </pre>
 
+Copie el fqbn de su placa de arduino (en este caso un Arduino Mega)
+
+```
+arduino-cli board list
+```
+
 Luego, compilar el código desde la carpeta contenedora de proyectos `Arduino` para un arduino mega
 
 ```
