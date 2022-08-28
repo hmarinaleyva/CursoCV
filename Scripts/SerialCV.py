@@ -2,20 +2,17 @@
 Este es un proyecto de prueba para el reconocimiento la boca, cejas y la punta de los dedos de una mano.
 La idea es calcular la distancia entre los dedos, para posteriormente cambiar el color de la boca y las cejas detectadas entre otras cosas.
 '''
+import os
 
-import cv2
+
+os.getcwd(path)
+
+import serial, os, cv2
 import mediapipe as mp
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
-mp_face_mesh = mp.solutions.face_mesh
 mp_hands = mp.solutions.hands
 
-# Crear un objeto de malla facial
-face_mesh = mp_face_mesh.FaceMesh( 
-        min_detection_confidence=0.5,
-        max_num_faces=2,
-        refine_landmarks=True,
-        min_tracking_confidence=0.5)
 
 hands = mp_hands.Hands( # create hands object
 		max_num_hands=4,
