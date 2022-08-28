@@ -236,10 +236,16 @@ En este caso, modificar el archivo para que contenga el siguiente código de mod
 <font color="#000000">}</font>
 </pre>
 
-Copie el fqbn de su placa de arduino (en este caso un Arduino Mega)
+Anote el puerto y el fqbn de su placa de arduino (en este caso, el puerto es `/dev/ttyACM0` y el fqbn es `arduino:avr:mega` para un Arduino Mega)
 
 ```
 arduino-cli board list
+```
+
+Instale el core dasosiado a su placa Arduino (en este caso `arduino:avr`)
+
+```
+arduino-cli core install arduino:avr
 ```
 
 Luego, compilar el código desde la carpeta contenedora de proyectos `Arduino` para un arduino mega
@@ -249,7 +255,7 @@ cd ~/Desktop/CursosCIMTT/CursoCV/Scripts/Arduino
 arduino-cli compile --fqbn arduino:avr:mega ./ArduinoTest
 ```
 
-y finalmente subir el skech
+y finalmente subir el skech a la placa de Arduino
 
 ```
 arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:mega ./ArduinoTest
