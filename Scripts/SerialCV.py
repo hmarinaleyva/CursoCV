@@ -1,9 +1,5 @@
-'''
-Este es un proyecto de prueba para el reconocimiento la boca, cejas y la punta de los dedos de una mano.
-La idea es calcular la distancia entre los dedos, para posteriormente cambiar el color de la boca y las cejas detectadas entre otras cosas.
-'''
-import os
 
+import os
 
 os.getcwd(path)
 
@@ -15,13 +11,13 @@ mp_hands = mp.solutions.hands
 
 
 hands = mp_hands.Hands( # create hands object
-		max_num_hands=4,
+		max_num_hands=1,
 		model_complexity=0,
 		min_detection_confidence=0.5,
 		min_tracking_confidence=0.5)
 
 # function to return the position of the fingertips in a list
-def fingertips_positions(results_hands):
+def fingertips_positions(results_hands, width, height):
     for hand_landmarks in results_hands.multi_hand_landmarks:   
         x0 = int(hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x * width)
         y0 = int(hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].y * height)
@@ -42,21 +38,10 @@ def draw_detected_objects(frame, objects_labels, objects_positions):
         cv2.putText(frame, objects_labels[i], position, cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
     return frame
 
-
-# function that draws a line between the indext finger tip and thumb finger
-def draw_line(frame, index_position, thumb_position, color):
-    cv2.line(frame, index_position, thumb_position, color, 4)
-    return frame
-
-# capture video
+# frame capture
 cap = cv2.VideoCapture(0)
 success, frame = cap.read()
 height, width, _ = frame.shape
-
-# define distance minimum between hand and face
-delta = .05
-delta_x = int(width*delta)
-delta_y = int(height*delta)
 
 # boolean flag to check if hand is detected
 PrevFingerDetect  = False
@@ -71,10 +56,9 @@ while cap.isOpened():
 
     frame.flags.writeable = False                   # make frame read-only
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # convert frame to RGB
-  
-    results_hands = hands.process(frame)            # process frame with hands object
-    results_face = face_mesh.process(frame)         # process frame with face detection object
 
+    results_hands = hands.process(frame)            # process frame with hands object
+    
     frame.flags.writeable = True
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
@@ -92,29 +76,6 @@ while cap.isOpened():
         index_position = fingertips[1]                                      # position of index finger
         draw_detected_objects(frame, fingertips_labels, fingertips)         # draw dots and labels at the fingertip position on the frame            
 
-        if results_face.multi_face_landmarks:
-            for face_landmarks in results_face.multi_face_landmarks:
-                mp_drawing.draw_landmarks(
-                    image=frame,
-                    landmark_list=face_landmarks,
-                    connections=mp_face_mesh.FACEMESH_TESSELATION,
-                    landmark_drawing_spec=None,
-                    connection_drawing_spec=mp_drawing_styles
-                    .get_default_face_mesh_tesselation_style())
-                mp_drawing.draw_landmarks(
-                    image=frame,
-                    landmark_list=face_landmarks,
-                    connections=mp_face_mesh.FACEMESH_CONTOURS,
-                    landmark_drawing_spec=None,
-                    connection_drawing_spec=mp_drawing_styles
-                    .get_default_face_mesh_contours_style())
-                mp_drawing.draw_landmarks(
-                    image=frame,
-                    landmark_list=face_landmarks,
-                    connections=mp_face_mesh.FACEMESH_IRISES,
-                    landmark_drawing_spec=None,
-                    connection_drawing_spec=mp_drawing_styles
-                    .get_default_face_mesh_iris_connections_style())
     else:
         if PrevFingerDetect:
             # Escribir en el centro de la del fotograma la palabra "HAND NOT DETECTED"
@@ -127,7 +88,6 @@ while cap.isOpened():
     if cv2.waitKey(5) & 0xFF == 27:
         break
 cap.release()
-
 
 
 while cap.isOpened():
@@ -147,8 +107,7 @@ while cap.isOpened():
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
     results_hands = hands.process(frame)            # process frame with hands object
-    results_face_mesh = face_mesh.process(frame)    # process frame with face mesh object
-
+    
     # check if hand is detected
     if results_hands.multi_hand_landmarks is not None:
         
