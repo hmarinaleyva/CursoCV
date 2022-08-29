@@ -216,6 +216,8 @@ void loop() {
 
 En este caso, modificar el archivo para que contenga el siguiente código de modo que se suene un BUZZER conectado al PIN 11 de un arduinio conectado a la Raspberry Pi. (Véase pin-out de un Arduino UNO R3 [aquí](https://elosciloscopio.com/wp-content/uploads/2021/03/Tutorial-de-Arduino-Uno-Pinout.png) ).
 
+
+```
 String message; 
 #define PIN_BUZZER  11  // Definir el pin de salida del BUZZER
 #define PIN_UP      5   // Definir el pin de salida del BUZZER
@@ -260,6 +262,7 @@ void loop() {
         Serial.println(message);
     }
 }
+```
 
 Anote el puerto y el fqbn de su placa de arduino (en este caso, el puerto es `/dev/ttyACM0` y el fqbn es `arduino:avr:mega` para un Arduino Mega)
 
