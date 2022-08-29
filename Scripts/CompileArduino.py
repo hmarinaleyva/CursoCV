@@ -7,8 +7,8 @@ ArduinoSketchDir = os.path.join(MainDir, '.', 'Arduino/ArduinoTest')
 os.chdir(ArduinoSketchDir)
 
 try:
-    os.system("arduino-cli compile --fqbn arduino:avr:uno")
-    os.system("arduino-cli upload -p /dev/ttyACM1 --fqbn arduino:avr:uno")
+    os.system("arduino-cli compile --fqbn arduino:avr:mega")
+    os.system("arduino-cli upload -p /dev/ttyACM1 --fqbn arduino:avr:mega")
 except:
     os.system("arduino-cli config init --overwrite")
     os.system("arduino-cli core install arduino:avr")

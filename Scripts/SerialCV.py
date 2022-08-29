@@ -2,7 +2,6 @@ import serial
 
 try:
     ser = serial.Serial('/dev/ttyACM1', 9600, timeout=1)
-    ser.write(b"4")
 
 except:
     print("No se estableció comunicación serial")
