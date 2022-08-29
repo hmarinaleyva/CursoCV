@@ -42,6 +42,12 @@ def draw_detected_objects(frame, objects_labels, objects_positions):
         cv2.putText(frame, objects_labels[i], position, cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
     return frame
 
+# function that draws a line between the object nearest to the index finger 
+def neighbor_object_line(frame, P0, object_positions):
+    sumCateros = [abs(x-P0[0]) + abs(y-P0[1]) for x,y in object_positions]
+    nearObjectIndex = sumCateros.index(min(sumCateros))
+    cv2.line(frame, P0, object_positions[nearObjectIndex], (255,0,255), 4)
+
 # frame capture
 cap = cv2.VideoCapture(0)
 success, frame = cap.read()
@@ -75,11 +81,13 @@ while cap.isOpened():
             cv2.putText(frame, "HAND DETECTED", (int(width/2), int(height/2)), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
             ser.write(b"1") # Hacer sonar BUZZER mediante comunicación serial
             PrevFingerDetect = True
-        
+
         fingertips = fingertips_positions(results_hands, width, height)     # position points of fingertips detected
         fingertips_labels = ["0", "1", "2", "3", "4"]                       # labels of fingertips detected
         index_position = fingertips[1]                                      # position of index finger
-        draw_detected_objects(frame, fingertips_labels, fingertips)         # draw dots and labels at the fingertip position on the frame            
+        draw_detected_objects(frame, fingertips_labels, fingertips)         # draw dots and labels at the fingertip position on the frame
+        object_positions = [(int(width/2), int(height/2)), (int(width/4), int(height/4)), (int(width/2), int(height/4)), (int(width/4), int(height/2))]   
+        neighbor_object_line(frame, index_position, object_positions)      
 
     else:
         if PrevFingerDetect:
