@@ -1,4 +1,4 @@
-# Compilar y sube un skech para una placa Arduino Uno conectada al puerto /dev/ttyACM0
+# Compilar y sube un skech para una placa Arduino Uno conectada al puerto /dev/ttyACM1
 
 import os
 
@@ -8,10 +8,10 @@ os.chdir(ArduinoSketchDir)
 
 try:
     os.system("arduino-cli compile --fqbn arduino:avr:uno")
-    os.system("arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:uno")
+    os.system("arduino-cli upload -p /dev/ttyACM1 --fqbn arduino:avr:uno")
 except:
     os.system("arduino-cli config init --overwrite")
     os.system("arduino-cli core install arduino:avr")
-    os.system("sudo chmod a+rw /dev/ttyACM0")
+    os.system("sudo chmod a+rw /dev/ttyACM1")
     os.system("arduino-cli compile --fqbn arduino:avr:uno")
     os.system("arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:uno")

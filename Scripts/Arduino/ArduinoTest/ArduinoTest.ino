@@ -8,7 +8,7 @@ String message;
 void setup() {
     // Inicializar el buzzer
     pinMode(PIN_BUZZER, OUTPUT);
-    Serial.begin(9600); // opens serial port, sets data rate to 9600 bps
+    Serial.begin(115200, SERIAL_8N1); // opens serial port, sets data rate to 9600 bps
 }
 
 void loop() {
@@ -39,6 +39,6 @@ void loop() {
         if (message == "RIGHT"){
             tone(PIN_RIGHT, 220, 100);
         }
-        Serial.println(message);
+        // Serial.println(message);
     }
 }

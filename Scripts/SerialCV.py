@@ -1,7 +1,7 @@
 import serial
 
 try:
-    ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+    ser = serial.Serial('/dev/ttyACM1', 9600, timeout=1)
     ser.write(b"4")
 
 except:
@@ -74,7 +74,7 @@ while cap.isOpened():
         if not PrevFingerDetect:
             # Escribir en el centro de la del fotograma la palabra "HAND DETECTED"
             cv2.putText(frame, "HAND DETECTED", (int(width/2), int(height/2)), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
-            ser.write(b"1") # Hacer sonar BUZZER mediante comunicación serial
+            ser.write(b"HAND_IN") # Hacer sonar BUZZER mediante comunicación serial
             PrevFingerDetect = True
         
         fingertips = fingertips_positions(results_hands, width, height)                    # position points of fingertips detected
@@ -85,8 +85,8 @@ while cap.isOpened():
     else:
         if PrevFingerDetect:
             # Escribir en el centro de la del fotograma la palabra "HAND NOT DETECTED"
-            cv2.putText(frame, "HAND NOT DETECTED", (int(width), int(height)), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
-            ser.write(b"0") # Hacer sonar BUZZER mediante comunicación serial
+            cv2.putText(frame, "HAND NOT DETECTED", (int(width/2), int(height/2)), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+            ser.write(b"HAND_OUT") # Hacer sonar BUZZER mediante comunicación serial
             PrevFingerDetect = False
 
     # Flip the frame horizontally for a selfie-view display.
@@ -95,3 +95,5 @@ while cap.isOpened():
     if cv2.waitKey(5) & 0xFF == 27:
         break
 cap.release()
+
+ser.close() # close port
