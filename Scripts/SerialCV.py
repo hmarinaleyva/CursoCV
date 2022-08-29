@@ -76,7 +76,7 @@ while cap.isOpened():
             ser.write(b"1") # Hacer sonar BUZZER mediante comunicación serial
             PrevFingerDetect = True
         
-        fingertips = fingertips_positions(results_hands, width, height)                    # position points of fingertips detected
+        fingertips = fingertips_positions(results_hands, width, height)     # position points of fingertips detected
         fingertips_labels = ["0", "1", "2", "3", "4"]                       # labels of fingertips detected
         index_position = fingertips[1]                                      # position of index finger
         draw_detected_objects(frame, fingertips_labels, fingertips)         # draw dots and labels at the fingertip position on the frame            
