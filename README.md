@@ -216,25 +216,50 @@ void loop() {
 
 En este caso, modificar el archivo para que contenga el siguiente código de modo que se suene un BUZZER conectado al PIN 11 de un arduinio conectado a la Raspberry Pi. (Véase pin-out de un Arduino UNO R3 [aquí](https://elosciloscopio.com/wp-content/uploads/2021/03/Tutorial-de-Arduino-Uno-Pinout.png) ).
 
-<pre>
-<font color="#5e6d03">#define</font> <font color="#000000">PIN_BUZZER</font> <font color="#000000">12</font> <font color="#434f54">&#47;&#47; Definir el pin de salida del BUZZER</font>
-<font color="#00979c">void</font> <font color="#5e6d03">setup</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
- &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; Inicializar el buzzer</font>
- &nbsp;&nbsp;&nbsp;<font color="#d35400">pinMode</font><font color="#000000">(</font><font color="#000000">PIN_BUZZER</font><font color="#434f54">,</font> <font color="#00979c">OUTPUT</font><font color="#000000">)</font><font color="#000000">;</font>
- &nbsp;&nbsp;&nbsp;<font color="#d35400">digitalWrite</font><font color="#000000">(</font><font color="#000000">PIN_BUZZER</font><font color="#434f54">,</font> <font color="#00979c">LOW</font><font color="#000000">)</font><font color="#000000">;</font>
-<font color="#000000">}</font>
+String message; 
+#define PIN_BUZZER  11  // Definir el pin de salida del BUZZER
+#define PIN_UP      5   // Definir el pin de salida del BUZZER
+#define PIN_DOWN    4   // Definir el pin de salida del BUZZER
+#define PIN_LEFT    3   // Definir el pin de salida del BUZZER
+#define PIN_RIGHT   2   // Definir el pin de salida del BUZZER
 
-<font color="#00979c">void</font> <font color="#5e6d03">loop</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
- &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; Hacer sonar el buzzer con una frecuencia de 440Hz (Nota A4) y duración de 1 segundo (1000 milisegundos)</font>
- &nbsp;&nbsp;&nbsp;<font color="#d35400">tone</font><font color="#000000">(</font><font color="#000000">PIN_BUZZER</font><font color="#434f54">,</font> <font color="#000000">440</font><font color="#434f54">,</font> <font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
- &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; Esperar media segundo</font>
- &nbsp;&nbsp;&nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">500</font><font color="#000000">)</font><font color="#000000">;</font> &nbsp;&nbsp;&nbsp;&nbsp;
- &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; Hacer sonar el buzzer con una frecuencia de 880Hz (Nota B4) y duración de 1 segundo</font>
- &nbsp;&nbsp;&nbsp;<font color="#d35400">tone</font><font color="#000000">(</font><font color="#000000">PIN_BUZZER</font><font color="#434f54">,</font> <font color="#000000">880</font><font color="#434f54">,</font> <font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
- &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; detener loop de sonido con un buble infinito vacío</font>
- &nbsp;&nbsp;&nbsp;<font color="#5e6d03">while</font><font color="#000000">(</font><font color="#000000">1</font><font color="#000000">)</font><font color="#000000">{</font> <font color="#000000">}</font>
-<font color="#000000">}</font>
-</pre>
+void setup() {
+    // Inicializar el buzzer
+    pinMode(PIN_BUZZER, OUTPUT);
+    Serial.begin(9600); // opens serial port, sets data rate to 9600 bps
+}
+
+void loop() {
+  
+    // Melodía de inicio
+    tone(PIN_BUZZER, 880, 150); delay(50); tone(PIN_BUZZER, 440, 150);
+    
+    // Comunicación serial
+    while(1){
+        while (Serial.available() == 0) {}  //wait for data available
+        message = Serial.readString();      //read until timeout
+        message.trim();                     // remove any \r \n whitespace at the end of the String
+        if (message == "HAND_OUT"){
+            tone(PIN_BUZZER, 440, 50); delay(50); tone(PIN_BUZZER, 220, 50);
+        }
+        if (message == "HAND_IN"){
+            tone(PIN_BUZZER, 220, 50); delay(50); tone(PIN_BUZZER, 440, 50);
+        }
+        if (message == "UP"){
+            tone(PIN_UP, 220, 100);
+        }
+        if (message == "DOWN"){
+            tone(PIN_DOWN, 220, 100);
+        }
+        if (message == "LEFT"){
+            tone(PIN_LEFT, 220, 100);
+        }
+        if (message == "RIGHT"){
+            tone(PIN_RIGHT, 220, 100);
+        }
+        Serial.println(message);
+    }
+}
 
 Anote el puerto y el fqbn de su placa de arduino (en este caso, el puerto es `/dev/ttyACM0` y el fqbn es `arduino:avr:mega` para un Arduino Mega)
 
