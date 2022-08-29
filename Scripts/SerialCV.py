@@ -7,8 +7,8 @@ os.system("arduino-cli board list")
 
 try:
     os.system("arduino-cli compile --fqbn arduino:avr:uno")
-    os.system("arduino-cli upload -p /dev/ttyACM1 --fqbn arduino:avr:uno")
-    ser = serial.Serial('/dev/ttyACM1', 9600, timeout=1)
+    os.system("arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:uno")
+    ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
 
 except:
     print("No se estableció comunicación serial")
