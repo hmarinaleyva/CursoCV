@@ -1,5 +1,10 @@
 import serial, os
 
+MainDir = os.path.dirname(os.path.abspath(__file__))
+ArduinoSketchDir = os.path.join(MainDir, '.', 'Arduino/ArduinoTest')
+os.chdir(ArduinoSketchDir)
+os.system("arduino-cli board list")
+
 try:
     os.system("arduino-cli compile --fqbn arduino:avr:uno")
     os.system("arduino-cli upload -p /dev/ttyACM1 --fqbn arduino:avr:uno")
