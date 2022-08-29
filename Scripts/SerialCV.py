@@ -95,5 +95,5 @@ while cap.isOpened():
     if cv2.waitKey(5) & 0xFF == 27:
         break
 cap.release()
-
+cv2.destroyAllWindows()
 ser.close() # close port
