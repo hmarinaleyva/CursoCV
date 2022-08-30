@@ -181,9 +181,10 @@ cd ~/Desktop/CursosCIMTT/
 ./VirtualTest/bin/python ./CursoCV/Scripts/Test.py
 ```
 
-## 5. Instalación de arduino-cli para Raspbian
+## Instalación de arduino-cli para Raspbian
 
 ```
+cd
 curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
 PATH=$PATH:/home/pi/bin
 sudo reboot
