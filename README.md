@@ -168,6 +168,7 @@ Instalar paquetes dentro del entorno virtual `VirtualTest`.
 
 ```
 pip install mediapipe
+pip install pyserial
 ```
 
 Con el comando `pip freeze` podemos ver los paquetes instalados en nuestro virtual `VirtualTest`.
