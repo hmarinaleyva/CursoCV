@@ -168,6 +168,7 @@ Instalar paquetes dentro del entorno virtual `VirtualTest`.
 
 ```
 pip install mediapipe
+pip install pyserial
 ```
 
 Con el comando `pip freeze` podemos ver los paquetes instalados en nuestro virtual `VirtualTest`.
@@ -181,9 +182,10 @@ cd ~/Desktop/CursosCIMTT/
 ./VirtualTest/bin/python ./CursoCV/Scripts/Test.py
 ```
 
-## 5. Instalación de arduino-cli para Raspbian
+## Instalación de arduino-cli para Raspbian
 
 ```
+cd
 curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
 PATH=$PATH:/home/pi/bin
 sudo reboot
