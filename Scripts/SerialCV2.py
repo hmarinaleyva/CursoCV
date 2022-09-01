@@ -1,8 +1,21 @@
 import serial, subprocess
 
-output = sp.getoutput('whoami --version')
-print (output)
+try:
+    PuertoArduino = subprocess.getoutput('arduino-cli board list').split()[9]
+    ArduinoSerial = serial.Serial(PuertoArduino, 9600, timeout=1)
+    ArduinoSerial.read()
+    print("Se detectó una placa Arduino conectada al Puerto: " + PuertoArduino)
 
+except:
+    print("No se estableció comunicación serial con una placa Arduino correctamente")
+
+
+
+
+
+
+
+exit()
 MainDir = os.path.dirname(os.path.abspath(__file__))
 ArduinoSketchDir = os.path.join(MainDir, '.', 'Arduino/ArduinoTest')
 os.chdir(ArduinoSketchDir)
