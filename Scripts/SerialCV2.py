@@ -1,4 +1,7 @@
-import serial, os
+import serial, subprocess
+
+output = sp.getoutput('whoami --version')
+print (output)
 
 MainDir = os.path.dirname(os.path.abspath(__file__))
 ArduinoSketchDir = os.path.join(MainDir, '.', 'Arduino/ArduinoTest')
