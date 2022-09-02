@@ -24,6 +24,14 @@ Instalar Git
 winget install --id Git.Git -e --source winget
 ```
 
+Configurar Git
+```
+git config --global user.name CimttGit
+git config --global user.email cursos.cimtt@gmail.com
+git config --global credential.helper store
+git config --list
+```
+
 Crear en una carpeta local `CursosCIMTT` en el escritorio para almacenar el repositorio del curso CIMTT.
 
 ```
@@ -353,11 +361,6 @@ except:
 ![](https://i.imgur.com/OwtjZCV.png)
 ![](https://i.imgur.com/lRJCFIX.png)
 ![](https://i.imgur.com/YJizwQl.png)
-```
-git config --global user.name CimttGit
-git config --global user.email cursos.cimtt@gmail.com
-git config --global credential.helper store
-git config --list
-```
+
 ![](https://i.imgur.com/sR7fT1E.png)
 
