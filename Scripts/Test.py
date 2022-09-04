@@ -1,5 +1,5 @@
 '''
-Este es un proyecto de prueba para el reconocimiento la boca, cejas y la punta de los dedos de una mano.
+Este es un proyecto de prueba para el reconocimiento de la boca, cejas y la punta de los dedos de una mano.
 La idea es calcular la distancia entre los dedos, para posteriormente cambiar el color de la boca y las cejas detectadas entre otras cosas.
 '''
 
