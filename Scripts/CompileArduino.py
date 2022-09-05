@@ -7,6 +7,7 @@ os.chdir(ArduinoSketchDir)
 
 try:
     InfoBoard = subprocess.getoutput('arduino-cli board list').split()
+    print(InfoBoard)
     PuertoArduino  = InfoBoard[9] # Obtener el puerto de la placa Arduino
     FQBN  = InfoBoard[16] # Obtener el FQBN de la placa Arduino
     os.system("arduino-cli compile --fqbn " + FQBN)
