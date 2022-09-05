@@ -1,34 +1,19 @@
 import serial, subprocess
 
 try:
-    PuertoArduino = subprocess.getoutput('arduino-cli board list').split()[9]
-    ArduinoSerial = serial.Serial(PuertoArduino, 9600, timeout=1)
-    ArduinoSerial.read()
-    print("Se detectó una placa Arduino conectada al Puerto: " + PuertoArduino)
-
+    InfoBoard = subprocess.getoutput('arduino-cli board list').split()
+    PuertoArduino  = InfoBoard[9] # Obtener el puerto de la placa Arduino
+    FQBN  = InfoBoard[16] # Obtener el FQBN de la placa Arduino
+    ArduinoSerial = serial.Serial(PuertoArduino, 9600, timeout=1) # open the serial port
+    ArduinoSerial.write(b'123456')  # send a byte string
+    RespuestaArduino = ArduinoSerial.read(8) # read a byte string
+    if RespuestaArduino != b'123456': # check the response
+        print("El microcontrolador no responde correctamente")
+        exit()
 except:
     print("No se estableció comunicación serial con una placa Arduino correctamente")
+    exit()
 
-
-
-
-
-
-
-exit()
-MainDir = os.path.dirname(os.path.abspath(__file__))
-ArduinoSketchDir = os.path.join(MainDir, '.', 'Arduino/ArduinoTest')
-os.chdir(ArduinoSketchDir)
-os.system("arduino-cli board list")
-
-try:
-    os.system("arduino-cli compile --fqbn arduino:avr:uno")
-    os.system("arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:uno")
-    ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
-
-except:
-    print("No se estableció comunicación serial")
-    #exit()
 
 import cv2
 import mediapipe as mp
