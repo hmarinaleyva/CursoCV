@@ -1,5 +1,5 @@
 int dato; 
-#define PIN_BUZZER  11  // Definir el pin de salida del BUZZER
+#define PIN_BUZZER  12  // Definir el pin de salida del BUZZER
 #define PIN_UP      5   // Definir el pin de salida del BUZZER
 #define PIN_DOWN    4   // Definir el pin de salida del BUZZER
 #define PIN_LEFT    3   // Definir el pin de salida del BUZZER

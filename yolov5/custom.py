@@ -123,7 +123,7 @@ def run(
         #pred = utils.general.apply_classifier(pred, classifier_model, im, im0s)
         
         #Predicciones de proceso
-          #por imagen
+        for i, det in enumerate(pred):  #por imagen
             seen += 1
             if webcam:  #batch_size >= 1
                 p, im0, frame = path[i], im0s[i].copy(), dataset.count
