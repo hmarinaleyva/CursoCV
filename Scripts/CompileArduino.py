@@ -1,7 +1,8 @@
 import os, serial, subprocess
 
+SketchPath = 'Arduino/ArduinoTest'
 MainDir = os.path.dirname(os.path.abspath(__file__))
-ArduinoSketchDir = os.path.join(MainDir, '.', 'Arduino/ArduinoTest')
+ArduinoSketchDir = os.path.join(MainDir, '.', SketchPath)
 os.chdir(ArduinoSketchDir)
 
 try:
@@ -10,9 +11,10 @@ try:
     FQBN  = InfoBoard[16] # Obtener el FQBN de la placa Arduino
     os.system("arduino-cli compile --fqbn " + FQBN)
     os.system("arduino-cli upload -p " + PuertoArduino +  " --fqbn " + FQBN)
-except:
+except Exception as e:
+    print("No se estableció comunicación serial con una placa Arduino correctamente")
     os.system("arduino-cli config init --overwrite")
     os.system("arduino-cli core install arduino:avr")
-    os.system("sudo chmod a+rw /dev/ttyACM0")
+    os.system("sudo chmod a+rw " + PuertoArduino)
     os.system("arduino-cli compile --fqbn " + FQBN)
     os.system("arduino-cli upload -p " + PuertoArduino +  " --fqbn " + FQBN)
