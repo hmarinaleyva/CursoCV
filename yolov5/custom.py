@@ -120,9 +120,10 @@ def run(
             pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
 
         #Clasificador de segunda etapa (opcional)
-#pred = utils.general.apply_classifier(pred, classifier_model, im, im0s)
-#Predicciones de procesos
-        for i, det in enumerate(pred):  #por imagen
+        #pred = utils.general.apply_classifier(pred, classifier_model, im, im0s)
+        
+        #Predicciones de proceso
+          #por imagen
             seen += 1
             if webcam:  #batch_size >= 1
                 p, im0, frame = path[i], im0s[i].copy(), dataset.count
@@ -145,7 +146,8 @@ def run(
                 for c in det[:, -1].unique():
                     n = (det[:, -1] == c).sum()  #detecciones por clase
                     s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  #agregar a cadena
-#Escribir resultados
+                
+                #Escribir resultados
                 for *xyxy, conf, cls in reversed(det):
                     if save_txt:  #Escribir en archivo
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  #xywh normalizado
@@ -169,7 +171,8 @@ def run(
                     cv2.resizeWindow(str(p), im0.shape[1], im0.shape[0])
                 cv2.imshow(str(p), im0)
                 cv2.waitKey(1)  #1 milisegundo
-#Guardar resultados (imagen con detecciones)
+            
+            #Guardar resultados (imagen con detecciones)
             if save_img:
                 if dataset.mode == 'image':
                     cv2.imwrite(save_path, im0)
