@@ -1,4 +1,4 @@
-import os, serial, subprocess
+import os, subprocess, serial
 
 SketchPath = 'Arduino/ArduinoTest'
 MainDir = os.path.dirname(os.path.abspath(__file__))
@@ -18,3 +18,5 @@ except Exception as e:
     os.system("sudo chmod a+rw " + PuertoArduino)
     os.system("arduino-cli compile --fqbn " + FQBN)
     os.system("arduino-cli upload -p " + PuertoArduino +  " --fqbn " + FQBN)
+
+ArduinoSerial = serial.Serial(PuertoArduino, 9600, timeout=1)
