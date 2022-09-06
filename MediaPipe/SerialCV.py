@@ -87,7 +87,7 @@ while cap.isOpened():
         if not PrevFingerDetect:
             # Escribir en el centro de la del fotograma la palabra "HAND DETECTED"
             cv2.putText(frame, "HAND DETECTED", (int(width/2), int(height/2)), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
-            ser.write(b"1") # Hacer sonar BUZZER mediante comunicación serial
+            #ser.write(b"1") # Hacer sonar BUZZER mediante comunicación serial
             PrevFingerDetect = True
 
         fingertips = fingertips_positions(results_hands, width, height)     # position points of fingertips detected
@@ -101,7 +101,7 @@ while cap.isOpened():
         if PrevFingerDetect:
             # Escribir en el centro de la del fotograma la palabra "HAND NOT DETECTED"
             cv2.putText(frame, "HAND NOT DETECTED", (int(width/2), int(height/2)), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
-            ser.write(b"2") # Hacer sonar BUZZER mediante comunicación serial
+            #ser.write(b"2") # Hacer sonar BUZZER mediante comunicación serial
             PrevFingerDetect = False
 
     # Flip the frame horizontally for a selfie-view display.
