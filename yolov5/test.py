@@ -1,25 +1,3 @@
-import serial, os
-
-MainDir = os.path.dirname(os.path.abspath(__file__))
-ArduinoSketchDir = os.path.join(MainDir, '.', 'Arduino/ArduinoTest')
-os.chdir(ArduinoSketchDir)
-os.system("arduino-cli board list")
-
-try:
-    os.system("arduino-cli compile --fqbn arduino:avr:uno")
-    os.system("arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:uno")
-    ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
-
-except:
-    print("No se estableció comunicación serial")
-    #exit()
-
-import cv2
-import mediapipe as mp
-mp_drawing = mp.solutions.drawing_utils
-mp_drawing_styles = mp.solutions.drawing_styles
-mp_hands = mp.solutions.hands
-
 import os
 import matplotlib.pyplot as plt
 
@@ -29,81 +7,72 @@ import cv2
 import mediapipe as mp
 from mediapipe.python.solutions import pose as mp_pose
 
-#if you are using colab
-#from google.colab.patches import cv2_imshow
-
-# PyTorch Hub
+#si está usando colab
+#desde google.colab.patches importar cv2_imshow
+#Centro PyTorch
 import torch
 
-# Model
+#Modelo
 yolo_model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
 
-#since we are only intrested in detecting person
+# Detectar solo la clase "persona"
 yolo_model.classes=[0]
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose =mp.solutions.pose
 
-video_path ="/content/Best 3 Dancers In The World 2017 - Dytto, Poppin John Dance_Trim.mp4"
-
-#get the dimension of the video
+#obtener la dimensión del vídeo
 cap = cv2.VideoCapture(0)
-while cap.isOpened():
-    ret, frame = cap.read()
-    h, w, _ = frame.shape
-    size = (w, h)
-    print(size)
-    break
+success, frame = cap.read()
+height, width, _ = frame.shape
+size = (width, height)
 
-cap = cv2.VideoCapture(0)
-
-#for webacam cv2.VideoCapture(NUM) NUM -> 0,1,2 for primary and secondary webcams..
-
-#For saving the video file as output.avi
+#para webacam cv2. VideoCapture(NUM) NUM -> 0,1,2 para cámaras web primarias y secundarias.
+#Para guardar el archivo de video como salida.avi
 out = cv2.VideoWriter("output.avi", cv2.VideoWriter_fourcc(*"MJPG"), 20, size)
 while cap.isOpened():    
-    ret, frame = cap.read()
-    if not ret:
-      break
-    # Recolor Feed from RGB to BGR
-    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    #making image writeable to false improves prediction
-    image.flags.writeable = False    
+    success, frame = cap.read()
+    if not success:
+        break
 
-    result = yolo_model(image)    
+    #Recolorear feed de RGB a BGR
+    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    #Hacer que la imagen se pueda escribir en falso mejora la predicción
+    image.flags.writeable = False 
+
+    result = yolo_model(image)
     
-    # Recolor image back to BGR for rendering
+    #Vuelva a colorear la imagen a BGR para su representación
     image.flags.writeable = True   
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-    # print(result.xyxy)  # img1 predictions (tensor)
 
-    #This array will contain crops of images incase we need it 
+    #print(result.xyxy) # predicciones img1 (tensor)
+    #Esta matriz contendrá recortes de imágenes en caso de que la necesitemos
     img_list =[]
     
-    #we need some extra margin bounding box for human crops to be properly detected
+    #necesitamos un margen delimitador adicional para que los cultivos humanos se detecten correctamente
     MARGIN=10
 
-    for (xmin, ymin, xmax,   ymax,  confidence,  clas) in result.xyxy[0].tolist():
+    for (xmin, ymin, xmax, ymax, confidence, clas) in result.xyxy[0].tolist():
       with mp_pose.Pose(min_detection_confidence=0.3, min_tracking_confidence=0.3) as pose:
-        #Media pose prediction ,we are 
+        #Predicción de postura de medios, somos
         results = pose.process(image[int(ymin)+MARGIN:int(ymax)+MARGIN,int(xmin)+MARGIN:int(xmax)+MARGIN:])
 
-        #Draw landmarks on image, if this thing is confusing please consider going through numpy array slicing 
+        #Dibuje puntos de referencia en la imagen, si esto es confuso, considere pasar por el corte de matriz numpy
         mp_drawing.draw_landmarks(image[int(ymin)+MARGIN:int(ymax)+MARGIN,int(xmin)+MARGIN:int(xmax)+MARGIN:], results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
                             mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=2), 
                             mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2) 
-                              ) 
+                            ) 
         img_list.append(image[int(ymin):int(ymax),int(xmin):int(xmax):])
-    cv2_imshow(image)
 
-    # writing in the video file 
+    #escribir en el archivo de vídeo
     out.write(image)
 
-    # Code to quit the video incase you are using the webcam             
-     cv2.imshow('Activity recognition', image)
-     if cv2.waitKey(10) & 0xFF == ord('q'):
-         break
+    #Código para salir del vídeo en caso de que esté utilizando la cámara web
+    cv2.imshow('Activity recognition', image)
+    if cv2.waitKey(10) & 0xFF == ord('q'):
+        break
 
 cap.release()
-out.release()
-#cv2.destroyAllWindows()
+#out.release()
+#Cv2.destruir todas las ventanas()
