@@ -1,13 +1,15 @@
-import serial, os
+import serial, os, subprocess
 
 MainDir = os.path.dirname(os.path.abspath(__file__))
-ArduinoSketchDir = os.path.join(MainDir, '.', 'Arduino/ArduinoTest')
+ArduinoSketchDir = os.path.join(MainDir, '..', 'Arduino/ArduinoTest')
 os.chdir(ArduinoSketchDir)
 os.system("arduino-cli board list")
 
 try:
-    os.system("arduino-cli compile --fqbn arduino:avr:uno")
-    os.system("arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:uno")
+    InfoBoard = subprocess.getoutput('arduino-cli board list').split()
+    PuertoArduino  = InfoBoard[9] # Obtener el puerto de la placa Arduino
+    FQBN  = InfoBoard[16] # Obtener el FQBN de la placa Arduino
+    ArduinoSerial = serial.Serial(PuertoArduino, 9600, timeout=1) # open the serial port
     ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
 
 except:
