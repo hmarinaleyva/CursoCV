@@ -1,3 +1,4 @@
+
 """
 Reconociendo objetos con YOLO y de la mano con MediaPipe
 """
@@ -94,14 +95,15 @@ while cap.isOpened():
         fingertips = fingertips_positions(results_hands, width, height)     # position points of fingertips detected
         fingertips_labels = ["0", "1", "2", "3", "4"]                       # labels of fingertips detected
         index_position = fingertips[1]                                      # position of index finger
-        draw_detected_objects(frame, fingertips_labels, fingertips)         # draw dots and labels at the fingertip position on the frame
-        #object_positions = [(int(width/2), int(height/2)), (int(width/4), int(height/4)), (int(width/2), int(height/4)), (int(width/4), int(height/2))]   
-        #neighbor_object_line(frame, index_position, object_positions)      
 
         # Resultados de YOLO
         result = yolo_model(frame)                                        # process frame with yolo model
         objects_labels = result.pandas().xyxy[0].name.tolist()            # labels of objects detected
         print(result.xyxy) # Imprimir resultados de YOLO
+
+
+        # 
+        draw_detected_objects(frame, fingertips_labels, fingertips)         # draw dots and labels at the fingertip position on the frame   
 
     else:
         if PrevFingerDetect:
