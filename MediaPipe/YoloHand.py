@@ -102,7 +102,6 @@ while cap.isOpened():
         print(result.xyxy) # Imprimir resultados de YOLO
 
 
-        # 
         draw_detected_objects(frame, fingertips_labels, fingertips)         # draw dots and labels at the fingertip position on the frame   
 
     else:
