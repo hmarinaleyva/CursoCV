@@ -57,20 +57,20 @@ else:
 
 
 tracker = HandTracker(
-        input_src=args.input, 
-        use_lm= not args.no_lm, 
+        #input_src=args.input, 
+        #use_lm= not args.no_lm, 
         use_world_landmarks=args.use_world_landmarks,
-        use_gesture=args.gesture,
-        xyz=args.xyz,
-        solo=args.solo,
-        crop=args.crop,
-        resolution=args.resolution,
-        stats=True,
-        trace=args.trace,
-        use_handedness_average=not args.use_last_handedness,
-        single_hand_tolerance_thresh=args.single_hand_tolerance_thresh,
-        lm_nb_threads=args.lm_nb_threads,
-        **tracker_args
+        #use_gesture=args.gesture,
+        #xyz=args.xyz,
+        #solo=args.solo,
+        #crop=args.crop,
+        #resolution=args.resolution,
+        #stats=True,
+        #trace=args.trace,
+        #use_handedness_average=not args.use_last_handedness,
+        #single_hand_tolerance_thresh=args.single_hand_tolerance_thresh,
+        #lm_nb_threads=args.lm_nb_threads,
+        #**tracker_args
         )
 
 renderer = HandTrackerRenderer(
@@ -83,7 +83,7 @@ while True:
     # and not related to a particular hand like body keypoints in Body Pre Focusing mode
     # Currently 'bag' contains meaningful information only when Body Pre Focusing is used
     frame, hands, bag = tracker.next_frame()
-    if frame is None: break
+    #if frame is None: break
     # Draw hands
     frame = renderer.draw(frame, hands, bag)
     key = renderer.waitKey(delay=1)
