@@ -17,4 +17,3 @@ try:
 except Exception as e:
     print("No se estableció comunicación serial con una placa Arduino correctamente")
     #exit()
-
