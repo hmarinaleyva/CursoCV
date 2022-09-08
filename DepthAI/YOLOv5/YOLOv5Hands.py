@@ -7,20 +7,7 @@ import argparse
 import time
 import numpy as np
 
-'''
-YoloV5 object detector running on selected camera.
-Run as:
-python3 -m pip install -r requirements.txt
-python3 main.py -cam rgb
-Possible input choices (-cam):
-'rgb', 'left', 'right'
 
-Blob is taken from ML training examples:
-https://github.com/luxonis/depthai-ml-training/tree/master/colab-notebooks
-
-You can clone the YoloV5_training.ipynb notebook and try training the model yourself.
-
-'''
 labelMap = [
     "Persona",        "Bicicleta",  "Auto",          "Moto",          "aeroplane",   "Bus",           "Tren",
     "truck",          "boat",       "Semaforo",      "fire hydrant",  "stop sign",   "parking meter", "bench",
@@ -35,23 +22,21 @@ labelMap = [
     "toaster",        "sink",       "refrigerator",  "book",          "clock",       "vase",          "scissors",
     "teddy bear",     "hair drier", "toothbrush"
 ]
-cam_options = ['rgb', 'left', 'right']
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-cam", "--cam_input", help="select camera input source for inference", default='rgb', choices=cam_options)
-parser.add_argument("-nn", "--nn_model", help="select model path for inference", default='models/yolov5s_sku_openvino_2021.4_6shave.blob', type=str)
+parser.add_argument("-nn", "--nn_model", help="select model path for inference", default='models/yolov5s_default_openvino_2021.4_6shave.blob', type=str)
 parser.add_argument("-conf", "--confidence_thresh", help="set the confidence threshold", default=0.3, type=float)
 parser.add_argument("-iou", "--iou_thresh", help="set the NMS IoU threshold", default=0.4, type=float)
 
 
 args = parser.parse_args()
 
-cam_source = args.cam_input
-nn_path = args.nn_model
-conf_thresh = args.confidence_thresh
-iou_thresh = args.iou_thresh
-
-nn_shape = 416
+cam_source = "rgb" # Definir camara central RGB del sensor OAK-D como fuente de video
+nn_path = "ModelYOLOv5.blob" # Ruta del modelo de la red neuronal entrenada para la deteción de objetos
+conf_thresh = 0.3 # Establecer el umbral de confianza
+iou_thresh = args.iou_thresh # Establecer el umbral de IoU de NMS
+nn_shape = 416 # resolución de la imagen de entrada de la red neuronal
 
 def draw_boxes(frame, boxes, total_classes):
     if boxes.ndim == 0:
