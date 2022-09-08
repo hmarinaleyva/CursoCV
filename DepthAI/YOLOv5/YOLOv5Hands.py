@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os, subprocess, serial
 import cv2
 import depthai as dai
 from util.functions import non_max_suppression
@@ -7,8 +8,16 @@ import argparse
 import time
 import numpy as np
 
+# Cambiar la ruta de ejecución aquí
+MainDir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(MainDir)
 
-labelMap = [
+# Ruta del modelo de la red neuronal entrenada para la deteción de objetos y parámetros de entrada
+nn_path = os.path.join(MainDir, './ModelsYOLO', "ModelYOLOv5.blob")
+conf_thresh = 0.3   # Establecer el umbral de confianza
+iou_thresh = 0.4    # Establecer el umbral de IoU de NMS
+nn_shape = 416      # resolución de la imagen de entrada de la red neuronal
+labelMap = [        # Establecer el mapa de etiquetas de la red neuronal
     "Persona",        "Bicicleta",  "Auto",          "Moto",          "aeroplane",   "Bus",           "Tren",
     "truck",          "boat",       "Semaforo",      "fire hydrant",  "stop sign",   "parking meter", "bench",
     "bird",           "cat",        "dog",           "horse",         "sheep",       "cow",           "elephant",
@@ -23,19 +32,10 @@ labelMap = [
     "teddy bear",     "hair drier", "toothbrush"
 ]
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-cam", "--cam_input", help="select camera input source for inference", default='rgb', choices=cam_options)
-parser.add_argument("-nn", "--nn_model", help="select model path for inference", default='models/yolov5s_default_openvino_2021.4_6shave.blob', type=str)
-parser.add_argument("-conf", "--confidence_thresh", help="set the confidence threshold", default=0.3, type=float)
-parser.add_argument("-iou", "--iou_thresh", help="set the NMS IoU threshold", default=0.4, type=float)
-
-
-args = parser.parse_args()
-
 cam_source = "rgb" # Definir camara central RGB del sensor OAK-D como fuente de video
-nn_path = "ModelYOLOv5.blob" # Ruta del modelo de la red neuronal entrenada para la deteción de objetos
+
 conf_thresh = 0.3 # Establecer el umbral de confianza
-iou_thresh = args.iou_thresh # Establecer el umbral de IoU de NMS
+iou_thresh = 0.4 # Establecer el umbral de IoU de NMS
 nn_shape = 416 # resolución de la imagen de entrada de la red neuronal
 
 def draw_boxes(frame, boxes, total_classes):
