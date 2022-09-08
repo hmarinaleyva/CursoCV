@@ -4,7 +4,6 @@ import os, subprocess, serial
 import cv2
 import depthai as dai
 from util.functions import non_max_suppression
-import argparse
 import time
 import numpy as np
 
@@ -32,11 +31,6 @@ labelMap = [        # Establecer el mapa de etiquetas de la red neuronal
     "teddy bear",     "hair drier", "toothbrush"
 ]
 
-cam_source = "rgb" # Definir camara central RGB del sensor OAK-D como fuente de video
-
-conf_thresh = 0.3 # Establecer el umbral de confianza
-iou_thresh = 0.4 # Establecer el umbral de IoU de NMS
-nn_shape = 416 # resolución de la imagen de entrada de la red neuronal
 
 def draw_boxes(frame, boxes, total_classes):
     if boxes.ndim == 0:
@@ -80,27 +74,14 @@ detection_nn.setNumPoolFrames(4)
 detection_nn.input.setBlocking(False)
 detection_nn.setNumInferenceThreads(2)
 
-cam=None
-# Define a source - color camera
-if cam_source == 'rgb':
-    cam = pipeline.create(dai.node.ColorCamera)
-    cam.setPreviewSize(nn_shape,nn_shape)
-    cam.setInterleaved(False)
-    cam.preview.link(detection_nn.input)
-elif cam_source == 'left':
-    cam = pipeline.create(dai.node.MonoCamera)
-    cam.setBoardSocket(dai.CameraBoardSocket.LEFT)
-elif cam_source == 'right':
-    cam = pipeline.create(dai.node.MonoCamera)
-    cam.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
-if cam_source != 'rgb':
-    manip = pipeline.create(dai.node.ImageManip)
-    manip.setResize(nn_shape,nn_shape)
-    manip.setKeepAspectRatio(True)
-    manip.setFrameType(dai.RawImgFrame.Type.BGR888p)
-    cam.out.link(manip.inputImage)
-    manip.out.link(detection_nn.input)
+# Definir camara central RGB del sensor OAK-D como fuente de video
+cam=None
+cam_source = "rgb" 
+cam = pipeline.create(dai.node.ColorCamera)
+cam.setPreviewSize(nn_shape,nn_shape)
+cam.setInterleaved(False)
+cam.preview.link(detection_nn.input)
 
 cam.setFps(40)
 
