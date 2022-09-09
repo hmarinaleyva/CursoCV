@@ -109,12 +109,11 @@ start_time = time.time()
 counter = 0
 fps = 0
 while True:
-    [frame, boxes, total_classes] = GetBoundingBoxes()
-
-    if boxes is not None:
-        frame = Draw_boxes(frame, boxes, total_classes)
     
-
+    [frame, boxes, total_classes] = GetBoundingBoxes()
+    
+    if boxes is not None: # Si hay objetos detectados
+        frame = Draw_boxes(frame, boxes, total_classes)
     
     # Calcular FPS y mostrar en pantalla
     counter += 1
