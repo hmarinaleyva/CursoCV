@@ -4,16 +4,14 @@ import os, time
 import cv2
 import depthai as dai
 import numpy as np
-from util.functions import non_max_suppression
-from re import T
-
+from Utilities.YoloFunctions import non_max_suppression
 
 # Cambiar la ruta de ejecución aquí
 MainDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(MainDir)
 
 # Ruta del modelo de la red neuronal entrenada para la deteción de objetos y parámetros de entrada
-nn_path = os.path.join(MainDir, './ModelsYOLO', "ModelYOLOv5.blob")
+nn_path = os.path.join(MainDir, './YoloModels', "YOLOv5sDefault.blob")
 conf_thresh = 0.3   # Establecer el umbral de confianza
 iou_thresh = 0.4    # Establecer el umbral de IoU de NMS
 nn_shape = 416      # resolución de la imagen de entrada de la red neuronal
@@ -59,8 +57,8 @@ xout_nn = pipeline.create(dai.node.XLinkOut)
 xout_nn.setStreamName("nn")
 xout_nn.input.setBlocking(False)
 detection_nn.out.link(xout_nn.input)
-device = dai.Device(pipeline)# Pipeline defined, now the device is assigned and pipeline is started
-# Output queues will be used to get the rgb frames and nn data from the outputs defined above
+device = dai.Device(pipeline)# pipeline definido, ahora se asigna el dispositivo y se inicia la pipeline
+# Las colas de salida se utilizarán para obtener las tramas rgb y los datos nn de las salidas definidas anteriormente
 q_nn_input = device.getOutputQueue(name="nn_input", maxSize=4, blocking=False)
 q_nn = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 
@@ -78,15 +76,6 @@ def GetBoundingBoxes(q_nn_input, q_nn):
     boxes = np.array(boxes[0])
     return [frame, boxes]
 
-
-# Calcular FPS y mostrar en pantalla
-def Show_FPS(frame_count, start_time):
-    global fps
-    frame_count += 1
-    fps = frame_count / (time.time() - start_time)
-    start_time = time.time()
-    cv2.putText(frame, "FPS: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.75, TextColor)
-
 fps = 0
 start_frame_time = 0
 BoxesColor = (0, 255, 0)
@@ -95,9 +84,11 @@ FontFace = cv2.FONT_HERSHEY_TRIPLEX # Fuente de texto
 while True:
     frame, boxes = GetBoundingBoxes(q_nn_input, q_nn) # Obtener fotograma de la cámara y las cajas de detección
     if boxes is not None and boxes.ndim != 0: # Si hay objetos detectados
-
+        CenterList = [] # Lista de la posición central de los objetos detectados
         for i in range(boxes.shape[0]): # Para cada objeto detectado
             x1, y1, x2, y2 = int(boxes[i,0]), int(boxes[i,1]), int(boxes[i,2]), int(boxes[i,3])
+            CenterList[i] = [int((x1+x2)/2), int((y1+y2)/2)] # Agregar la posición central del objeto a la lista
+
             conf, class_index = boxes[i, 4], int(boxes[i, 5]) # Extraer la confianza y el índice de la clase de la predicción
             label = f"{labelMap[class_index]}: {conf:.2f}" # Crear etiqueta de la clase predicha
             frame = cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, 1) # Dibujar caja de detección
