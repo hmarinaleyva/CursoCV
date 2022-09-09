@@ -82,7 +82,11 @@ BoxesColor = (0, 255, 0)
 LineColor = (0, 0, 255)
 CircleColor = (255, 0, 0)
 TextColor = (255,255,255)
-FontFace = cv2.FONT_HERSHEY_TRIPLEX # Fuente de texto 
+FontFace = cv2.FONT_HERSHEY_TRIPLEX # Fuente de texto
+
+# Coordenadas del centro de la imagen
+x0 = nn_shape//2
+y0 = nn_shape//2
 
 while True:
     
@@ -98,9 +102,15 @@ while True:
 
     # Si hay objetos detectados 
     if boxes is not None and boxes.ndim != 0:
-         
-        CenterList = [] # Lista de la posición central de los objetos detectados
-        for i in range(boxes.shape[0]): # Para cada objeto detectado
+
+        # Coordenadas del centro de los objetos detectados
+        DetectionCentroids = []
+
+        # Distancias hw entre el centro de la imagen y el centro de los objetos detectados
+        Distances = []
+
+        # Para cada objeto detectado
+        for i in range(boxes.shape[0]): 
             
             # Extraer los datos de la caja delimitadora
             x1, y1, x2, y2 = int(boxes[i,0]), int(boxes[i,1]), int(boxes[i,2]), int(boxes[i,3]) # Coordenadas de la caja delimitadora
@@ -109,6 +119,11 @@ while True:
             # Calcular las cordenadas del centro de la caja delimitadora
             x = int((x1+x2)/2) # coordenada horizontal del centro de la caja delimitadora
             y = int((y1+y2)/2) # coordenada vertical del centro de la caja delimitadora
+            DetectionCentroids.append((x,y)) # Agregar las coordenadas del centro de la caja delimitadora a la lista DetectionCentroids
+
+            # Sumar la distancia vetical y horizontal (hw) entre el centro de la caja delimitadora y el centro de la imagen
+            hw = abs(x-x0) + abs(y-y0)
+            Distances.append(hw) # Agregar la distancia hw a la lista Distances
 
             # Dibujar en el fotograma actual marcas de interés
             label = f"{labelMap[class_index]}: {conf:.2f}" # Crear etiqueta de la clase predicha
@@ -117,6 +132,13 @@ while True:
             frame = cv2.rectangle(frame, (x1, y1 - 2*h), (x1 + w, y1), BoxesColor, -1) # Dibuja el recuadro de la etiqueta
             frame = cv2.putText(frame, label, (x1, y1 - 5), FontFace, 0.3, TextColor, 1) # Dibuja el texto de la etiqueta
             frame = cv2.circle(frame, (x, y), 2, CircleColor, 2) # Dibuja un círculo en el centro de la caja de detección
+
+        # Obtener las coordenadas del centro de la caja delimitadora más cercana
+        NeighborObjectPosition = DetectionCentroids[Distances.index(min(Distances))]
+
+        # Trazar una línea desde el centro de la imagen hasta el centro de la caja delimitadora más cercana
+        cv2.line(frame, (x0, y0), NeighborObjectPosition, LineColor, 2)
+
     # Mostar el fotograma en una ventana
     fps = 1 / (time.time() - start_frame_time) # Calcular FPS
     cv2.putText(frame, "FPS: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.75, TextColor) # Mostrar FPS

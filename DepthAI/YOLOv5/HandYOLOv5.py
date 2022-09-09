@@ -4,11 +4,15 @@ import os, time
 import cv2
 import depthai as dai
 import numpy as np
+from mediapipe import solutions
 from Utilities.YoloFunctions import non_max_suppression
 
 # Cambiar la ruta de ejecución aquí
 MainDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(MainDir)
+
+# Crear un objeto de la clase de detección de manos de MediaPipe 
+Hand = solutions.hands.Hands(max_num_hands=1) # Ajuste del atibuto de la clase para detectar solo un mano
 
 # Ruta del modelo de la red neuronal entrenada para la deteción de objetos y parámetros de entrada
 nn_path = os.path.join(MainDir, './YoloModels', "YOLOv5sDefault.blob")
@@ -62,7 +66,12 @@ device = dai.Device(pipeline)# pipeline definido, ahora se asigna el dispositivo
 q_nn_input = device.getOutputQueue(name="nn_input", maxSize=4, blocking=False)
 q_nn = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 
-
+# Función que retorna la posición de la punta del dedo índice
+def FingerTip_Position(Hand_Detection):
+    for hand_landmarks in Hand_Detection.multi_hand_landmarks:   
+        x0 = int(hand_landmarks.landmark[Hand.HandLandmark.INDEX_FINGER_TIP].x * nn_shape)
+        y0 = int(hand_landmarks.landmark[Hand.HandLandmark.INDEX_FINGER_TIP].y * nn_shape)
+    return [(x0,y0)]
 
 def GetBoundingBoxes(q_nn_input, q_nn):    
     in_nn_input = q_nn_input.get()
@@ -93,31 +102,33 @@ while True:
     if cv2.waitKey(1) in [27, 32, ord('q')]:
         break
 
+
     # Obtener fotograma de la cámara OAK-D y la salida de la red neuronal compilada en el dispositivo
     frame, boxes = GetBoundingBoxes(q_nn_input, q_nn)
 
-    # Si hay objetos detectados 
-    if boxes is not None and boxes.ndim != 0:
-         
-        CenterList = [] # Lista de la posición central de los objetos detectados
-        for i in range(boxes.shape[0]): # Para cada objeto detectado
-            
-            # Extraer los datos de la caja delimitadora
-            x1, y1, x2, y2 = int(boxes[i,0]), int(boxes[i,1]), int(boxes[i,2]), int(boxes[i,3]) # Coordenadas de la caja delimitadora
-            conf, class_index = boxes[i, 4], int(boxes[i, 5]) # Extraer la confianza y el índice de la clase de la predicción
 
-            # Calcular las cordenadas del centro de la caja delimitadora
-            x = int((x1+x2)/2) # coordenada horizontal del centro de la caja delimitadora
-            y = int((y1+y2)/2) # coordenada vertical del centro de la caja delimitadora
-
-            # Dibujar en el fotograma actual marcas de interés
-            label = f"{labelMap[class_index]}: {conf:.2f}" # Crear etiqueta de la clase predicha
-            frame = cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, 1) # Dibujar caja de detección
-            (w, h), _ = cv2.getTextSize(label, FontFace, 0.3, 1) # Obtener el ancho y alto de la etiqueta
-            frame = cv2.rectangle(frame, (x1, y1 - 2*h), (x1 + w, y1), BoxesColor, -1) # Dibuja el recuadro de la etiqueta
-            frame = cv2.putText(frame, label, (x1, y1 - 5), FontFace, 0.3, TextColor, 1) # Dibuja el texto de la etiqueta
-            frame = cv2.circle(frame, (x, y), 2, CircleColor, 2) # Dibuja un círculo en el centro de la caja de detección
+        ## Si hay objetos detectados 
+        #if boxes is not None and boxes.ndim != 0:
+        #     
+        #    CenterList = [] # Lista de la posición central de los objetos detectados
+        #    for i in range(boxes.shape[0]): # Para cada objeto detectado
+        #        
+        #        # Extraer los datos de la caja delimitadora
+        #        x1, y1, x2, y2 = int(boxes[i,0]), int(boxes[i,1]), int(boxes[i,2]), int(boxes[i,3]) # Coordenadas de la caja delimitadora
+        #        conf, class_index = boxes[i, 4], int(boxes[i, 5]) # Extraer la confianza y el índice de la clase de la predicción
     
+        #        # Calcular las cordenadas del centro de la caja delimitadora
+        #        x = int((x1+x2)/2) # coordenada horizontal del centro de la caja delimitadora
+        #        y = int((y1+y2)/2) # coordenada vertical del centro de la caja delimitadora
+    
+        #        # Dibujar en el fotograma actual marcas de interés
+        #        label = f"{labelMap[class_index]}: {conf:.2f}" # Crear etiqueta de la clase predicha
+        #        frame = cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, 1) # Dibujar caja de detección
+        #        (w, h), _ = cv2.getTextSize(label, FontFace, 0.3, 1) # Obtener el ancho y alto de la etiqueta
+        #        frame = cv2.rectangle(frame, (x1, y1 - 2*h), (x1 + w, y1), BoxesColor, -1) # Dibuja el recuadro de la etiqueta
+        #        frame = cv2.putText(frame, label, (x1, y1 - 5), FontFace, 0.3, TextColor, 1) # Dibuja el texto de la etiqueta
+        #        frame = cv2.circle(frame, (x, y), 2, CircleColor, 2) # Dibuja un círculo en el centro de la caja de detección
+        
     # Mostar el fotograma en una ventana
     fps = 1 / (time.time() - start_frame_time) # Calcular FPS
     cv2.putText(frame, "FPS: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.75, TextColor) # Mostrar FPS
