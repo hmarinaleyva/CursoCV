@@ -18,18 +18,18 @@ conf_thresh = 0.3   # Establecer el umbral de confianza
 iou_thresh = 0.4    # Establecer el umbral de IoU de NMS
 nn_shape = 416      # resolución de la imagen de entrada de la red neuronal
 labelMap = [        # Establecer el mapa de etiquetas de la red neuronal
-    "Persona",        "Bicicleta",  "Auto",          "Moto",          "aeroplane",   "Bus",           "Tren",
-    "truck",          "boat",       "Semaforo",      "fire hydrant",  "stop sign",   "parking meter", "bench",
-    "bird",           "cat",        "dog",           "horse",         "sheep",       "cow",           "elephant",
-    "bear",           "zebra",      "giraffe",       "backpack",      "umbrella",    "handbag",       "tie",
-    "suitcase",       "frisbee",    "skis",          "snowboard",     "sports ball", "kite",          "baseball bat",
-    "baseball glove", "skateboard", "surfboard",     "tennis racket", "bottle",      "wine glass",    "cup",
-    "fork",           "knife",      "spoon",         "bowl",          "banana",      "Manzana",         "sandwich",
-    "orange",         "broccoli",   "carrot",        "Hot-Hog",       "pizza",       "donut",         "cake",
-    "chair",          "sofa",       "pottedplant",   "bed",           "diningtable", "toilet",        "tvmonitor",
-    "Laptop",         "Mouse",      "remote",        "keyboard",      "SmartPhone",  "microwave",     "oven",
-    "toaster",        "sink",       "refrigerator",  "book",          "clock",       "vase",          "scissors",
-    "teddy bear",     "hair drier", "toothbrush"
+    "Persona", "Bicicleta", "Auto", "Moto", "Avión", "Autobús", "Tren",
+    "Camión", "Barco", "Semáforo", "Grifo", "Stop", "Parquímetro", "Banco",
+    "Pájaro", "Gato", "Perro", "Caballo", "Oveja", "Vaca", "Elefante",
+    "Oso", "Cebra", "Jirafa", "Mochila", "Paraguas", "Bolso", "Corbata",
+    "Maleta", "Frisbee", "Esquís", "Snowboard", "Pelota", "Cometa", "Bate",
+    "Guante", "Monopatín", "tabla de surf", "raqueta de tenis", "Botella", "Copa", "taza",
+    "Tenedor", "Cuchillo", "Cuchara", "Cuenco", "Plátano", "Manzana", "Sándwich",
+    "Naranja", "Brócoli", "Zanahoria", "Hot-Hog", "Pizza", "Dona", "Pastel",
+    "Silla", "Sofá", "Maceta", "Cama", "Comedor", "Baño", "TV",
+    "portátil", "Ratón", "mando", "Teclado", "SmartPhone", "Microondas", "Horno",
+    "Tostadora", "Fregadero", "Nevera", "Libro", "Reloj", "Jarrón", "Tijeras",
+    "Peluche", "Secador", "Cepillo"
 ]
 
 def GetBoundingBoxes():    
@@ -52,10 +52,7 @@ def Draw_boxes(frame, boxes, total_classes):
         return frame
     else:
         # define class colors
-        colors = boxes[:, 5] * (255 / total_classes)
-        colors = colors.astype(np.uint8)
-        colors = cv2.applyColorMap(colors, cv2.COLORMAP_HSV)
-        colors = np.array(colors)
+        color = (0,0,0) #
 
         for i in range(boxes.shape[0]):
             x1, y1, x2, y2 = int(boxes[i,0]), int(boxes[i,1]), int(boxes[i,2]), int(boxes[i,3])
@@ -63,7 +60,7 @@ def Draw_boxes(frame, boxes, total_classes):
 
             label = f"{labelMap[class_index]}: {conf:.2f}"
 
-            frame = cv2.rectangle(frame, (x1, y1), (x2, y2), color, 1)
+            frame = cv2.rectangle(frame, (x1, y1), (x2, y2), (0,0,0), 1)
 
             # Get the width and height of label for bg square
             (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.3, 1)
@@ -76,13 +73,9 @@ def Draw_boxes(frame, boxes, total_classes):
 
 # Start defining a pipeline
 pipeline = dai.Pipeline()
-
 pipeline.setOpenVINOVersion(version = dai.OpenVINO.VERSION_2021_4)
-
-# Define a neural network that will make predictions based on the source frames
-detection_nn = pipeline.create(dai.node.NeuralNetwork)
+detection_nn = pipeline.create(dai.node.NeuralNetwork)# Define a neural network that will make predictions based on the source frames
 detection_nn.setBlobPath(nn_path)
-
 detection_nn.setNumPoolFrames(4)
 detection_nn.input.setBlocking(False)
 detection_nn.setNumInferenceThreads(2)
@@ -129,10 +122,10 @@ while True:
     cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, (255, 0, 0))
     cv2.imshow("nn_input", frame)
 
+    # Calcular FPS
     counter += 1
     if (time.time() - start_time) > 1:
         fps = counter / (time.time() - start_time)
-
         counter = 0
         start_time = time.time()
 
