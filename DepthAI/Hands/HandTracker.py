@@ -287,7 +287,7 @@ class HandTracker:
             if self.crop:
                 cam.setVideoSize(self.frame_size, self.frame_size)
                 cam.setPreviewSize(self.pd_input_length, self.pd_input_length)
-                
+               
             else: 
                 cam.setVideoSize(self.img_w, self.img_h)
                 cam.setPreviewSize(self.img_w, self.img_h)
