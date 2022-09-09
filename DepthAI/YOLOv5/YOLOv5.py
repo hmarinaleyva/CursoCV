@@ -91,9 +91,8 @@ frame_count = 0
 BoxesColor = (0, 255, 0)
 while True:
     
-    [frame, boxes, total_classes] = GetBoundingBoxes(q_nn_input, q_nn)
     
-    
+    frame, boxes = GetBoundingBoxes(q_nn_input, q_nn) # Obtener fotograma de la cámara y las cajas de detección
     if boxes is not None: # Si hay objetos detectados
         for i in range(boxes.shape[0]): # Para cada objeto detectado
             x1, y1, x2, y2 = int(boxes[i,0]), int(boxes[i,1]), int(boxes[i,2]), int(boxes[i,3])
