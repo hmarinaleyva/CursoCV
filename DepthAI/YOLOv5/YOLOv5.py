@@ -79,30 +79,45 @@ def GetBoundingBoxes(q_nn_input, q_nn):
 fps = 0
 start_frame_time = 0
 BoxesColor = (0, 255, 0)
+LineColor = (0, 0, 255)
+CircleColor = (255, 0, 0)
 TextColor = (255,255,255)
 FontFace = cv2.FONT_HERSHEY_TRIPLEX # Fuente de texto 
+
 while True:
-    frame, boxes = GetBoundingBoxes(q_nn_input, q_nn) # Obtener fotograma de la cámara y las cajas de detección
-    if boxes is not None and boxes.ndim != 0: # Si hay objetos detectados
+    
+    # Iniciar el contador de tiempo para calcular los FPS
+    start_frame_time = time.time() 
+    
+    # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
+    if cv2.waitKey(1) in [27, 32, ord('q')]:
+        break
+
+    # Obtener fotograma de la cámara OAK-D y la salida de la red neuronal compilada en el dispositivo
+    frame, boxes = GetBoundingBoxes(q_nn_input, q_nn)
+
+    # Si hay objetos detectados 
+    if boxes is not None and boxes.ndim != 0:
+         
         CenterList = [] # Lista de la posición central de los objetos detectados
         for i in range(boxes.shape[0]): # Para cada objeto detectado
-            x1, y1, x2, y2 = int(boxes[i,0]), int(boxes[i,1]), int(boxes[i,2]), int(boxes[i,3])
-            CenterList[i] = [int((x1+x2)/2), int((y1+y2)/2)] # Agregar la posición central del objeto a la lista
-
+            
+            # Extraer los datos de la caja delimitadora
+            x1, y1, x2, y2 = int(boxes[i,0]), int(boxes[i,1]), int(boxes[i,2]), int(boxes[i,3]) # Coordenadas de la caja delimitadora
             conf, class_index = boxes[i, 4], int(boxes[i, 5]) # Extraer la confianza y el índice de la clase de la predicción
+
+            # Calcular las cordenadas del centro de la caja delimitadora
+            x = int((x1+x2)/2) # coordenada horizontal del centro de la caja delimitadora
+            y = int((y1+y2)/2) # coordenada vertical del centro de la caja delimitadora
+
+            # Dibujar en el fotograma actual marcas de interés
             label = f"{labelMap[class_index]}: {conf:.2f}" # Crear etiqueta de la clase predicha
             frame = cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, 1) # Dibujar caja de detección
             (w, h), _ = cv2.getTextSize(label, FontFace, 0.3, 1) # Obtener el ancho y alto de la etiqueta
             frame = cv2.rectangle(frame, (x1, y1 - 2*h), (x1 + w, y1), BoxesColor, -1) # Dibuja el recuadro de la etiqueta
             frame = cv2.putText(frame, label, (x1, y1 - 5), FontFace, 0.3, TextColor, 1) # Dibuja el texto de la etiqueta
-
+            frame = cv2.circle(frame, (x, y), 2, CircleColor, 2) # Dibuja un círculo en el centro de la caja de detección
+    # Mostar el fotograma en una ventana
+    fps = 1 / (time.time() - start_frame_time) # Calcular FPS
     cv2.putText(frame, "FPS: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.75, TextColor) # Mostrar FPS
     cv2.imshow("YOLOv5Hands", frame)  # Mostrar frame en pantalla
-
-    fps = 1 / (time.time() - start_frame_time) # Calcular FPS
-    start_frame_time = time.time() # Reiniciar el contador de tiempo
-   
-
-    # Salir del programa si alguna de estas teclas son presionadas {ESC, q, SPACE} 
-    if cv2.waitKey(1) in [27, ord('q'), 32]:
-        break

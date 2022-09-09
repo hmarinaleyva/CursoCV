@@ -1,42 +1,33 @@
 #!/usr/bin/env python3
 
 import os, time
-import numpy as np
 import cv2
 import depthai as dai
-from re import T
-from util.functions import non_max_suppression
-from mediapipe import solutions
+import numpy as np
+from Utilities.YoloFunctions import non_max_suppression
 
 # Cambiar la ruta de ejecución aquí
 MainDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(MainDir)
 
-# create a object detector for detect fingers
-hands = solutions.hands.Hands( # create hands object
-		max_num_hands=1,
-		model_complexity=0,
-		min_detection_confidence=0.5,
-		min_tracking_confidence=0.5)
-
 # Ruta del modelo de la red neuronal entrenada para la deteción de objetos y parámetros de entrada
-nn_path = os.path.join(MainDir, './ModelsYOLO', "ModelYOLOv5.blob")
+nn_path = os.path.join(MainDir, './YoloModels', "YOLOv5sDefault.blob")
 conf_thresh = 0.3   # Establecer el umbral de confianza
 iou_thresh = 0.4    # Establecer el umbral de IoU de NMS
 nn_shape = 416      # resolución de la imagen de entrada de la red neuronal
 labelMap = [        # Establecer el mapa de etiquetas de la red neuronal
-    "Persona", "Bicicleta", "Auto", "Moto", "Avión", "Autobús", "Tren",
-    "Camión", "Barco", "Semáforo", "Grifo", "Stop", "Parquímetro", "Banco",
-    "Pájaro", "Gato", "Perro", "Caballo", "Oveja", "Vaca", "Elefante",
-    "Oso", "Cebra", "Jirafa", "Mochila", "Paraguas", "Bolso", "Corbata",
-    "Maleta", "Frisbee", "Esquís", "Snowboard", "Pelota", "Cometa", "Bate",
-    "Guante", "Monopatín", "Surf", "raqueta de tenis", "Botella", "Copa", "taza",
-    "Tenedor", "Cuchillo", "Cuchara", "Cuenco", "Plátano", "Manzana", "Sándwich",
-    "Naranja", "Brócoli", "Zanahoria", "Hot-Hog", "Pizza", "Dona", "Pastel",
-    "Silla", "Sofá", "Maceta", "Cama", "Comedor", "Baño", "TV",
-    "Portátil", "Ratón", "mando", "Teclado", "SmartPhone", "Microondas", "Horno",
-    "Tostadora", "Fregadero", "Nevera", "Libro", "Reloj", "Jarrón", "Tijeras",
-    "Peluche", "Secador", "Cepillo"
+    "Persona",   "Bicicleta", "Auto",      "Moto",      "Avión",      "Autobús",     "Tren",
+    "Camión",    "Barco",     "Semáforo",  "Grifo",     "Stop",       "Parquímetro", "Banco",
+    "Pájaro",    "Gato",      "Perro",     "Caballo",   "Oveja",      "Vaca",        "Elefante",
+    "Oso",       "Cebra",     "Jirafa",    "Mochila",   "Paraguas",   "Bolso",       "Corbata",
+    "Maleta",    "Frisbee",   "Esquís",    "Snowboard", "Pelota",     "Cometa",      "Bate",
+    "Guante",    "Monopatín", "Surf",      "Raqueta",   "Botella",    "Copa",        "Taza",
+    "Tenedor",   "Cuchillo",  "Cuchara",   "Cuenco",    "Plátano",    "Manzana",     "Sándwich",
+    "Naranja",   "Brócoli",   "Zanahoria", "Hot-Hog",   "Pizza",      "Dona",        "Pastel",
+    "Silla",     "Sofá",      "Maceta",    "Cama",      "Comedor",    "Baño",        "TV",
+    "Portátil",  "Ratón",     "mando",     "Teclado",   "SmartPhone", "Microondas",  "Horno",
+    "Tostadora", "Fregadero", "Nevera",    "Libro",     "Reloj",      "Jarrón",      "Tijeras",
+    "Peluche",   "Secador",   "Cepillo"
 ]
 
 # Start defining a pipeline
@@ -66,8 +57,8 @@ xout_nn = pipeline.create(dai.node.XLinkOut)
 xout_nn.setStreamName("nn")
 xout_nn.input.setBlocking(False)
 detection_nn.out.link(xout_nn.input)
-device = dai.Device(pipeline)# Pipeline defined, now the device is assigned and pipeline is started
-# Output queues will be used to get the rgb frames and nn data from the outputs defined above
+device = dai.Device(pipeline)# pipeline definido, ahora se asigna el dispositivo y se inicia la pipeline
+# Las colas de salida se utilizarán para obtener las tramas rgb y los datos nn de las salidas definidas anteriormente
 q_nn_input = device.getOutputQueue(name="nn_input", maxSize=4, blocking=False)
 q_nn = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 
@@ -81,50 +72,53 @@ def GetBoundingBoxes(q_nn_input, q_nn):
     cols = output.shape[0]//10647# reshape to proper format
     output = np.reshape(output, (10647, cols))
     output = np.expand_dims(output, axis = 0)
-    total_classes = cols - 5
     boxes = non_max_suppression(output, conf_thres=conf_thresh, iou_thres=iou_thresh)
     boxes = np.array(boxes[0])
-    return [frame, boxes, total_classes]
+    return [frame, boxes]
 
+fps = 0
+start_frame_time = 0
+BoxesColor = (0, 255, 0)
+LineColor = (0, 0, 255)
+CircleColor = (255, 0, 0)
+TextColor = (255,255,255)
+FontFace = cv2.FONT_HERSHEY_TRIPLEX # Fuente de texto 
 
-def Draw_boxes(frame, boxes, total_classes):
-    ColorBox = (0, 255, 0)
-    if boxes.ndim == 0:
-        return frame
-    else:
-
-        for i in range(boxes.shape[0]): # Para cada objeto detectado
-            x1, y1, x2, y2 = int(boxes[i,0]), int(boxes[i,1]), int(boxes[i,2]), int(boxes[i,3])
-            conf, class_index = boxes[i, 4], int(boxes[i, 5])
-            label = f"{labelMap[class_index]}: {conf:.2f}"
-            frame = cv2.rectangle(frame, (x1, y1), (x2, y2), ColorBox, 1)
-            # Get the width and height of label for bg square
-            (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.3, 1)
-
-            # Shows the text.
-            frame = cv2.rectangle(frame, (x1, y1 - 2*h), (x1 + w, y1), ColorBox, -1)
-            frame = cv2.putText(frame, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,255,255), 1)
-    return frame
-
-# Calcular FPS y mostrar en pantalla
-def Show_FPS(frame_count, start_time):
-    frame_count += 1
-    fps = frame_count / (time.time() - start_time)
-    start_time = time.time()
-    cv2.putText(frame, "FPS: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.75, (255, 255, 255))
-
-start_time = time.time()
-frame_count = 0
 while True:
     
-    [frame, boxes, total_classes] = GetBoundingBoxes(q_nn_input, q_nn)
+    # Iniciar el contador de tiempo para calcular los FPS
+    start_frame_time = time.time() 
     
-    if boxes is not None: # Si hay objetos detectados
-        frame = Draw_boxes(frame, boxes, total_classes)
-    
-    Show_FPS(frame_count, start_time) # Mostrar FPS en el frame
-    cv2.imshow("YOLOv5Hands", frame)  # Mostrar frame en pantalla
-
-    # Salir del programa si alguna de estas teclas son presionadas {ESC, q, SPACE} 
-    if cv2.waitKey(1) in [27, ord('q'), 32]:
+    # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
+    if cv2.waitKey(1) in [27, 32, ord('q')]:
         break
+
+    # Obtener fotograma de la cámara OAK-D y la salida de la red neuronal compilada en el dispositivo
+    frame, boxes = GetBoundingBoxes(q_nn_input, q_nn)
+
+    # Si hay objetos detectados 
+    if boxes is not None and boxes.ndim != 0:
+         
+        CenterList = [] # Lista de la posición central de los objetos detectados
+        for i in range(boxes.shape[0]): # Para cada objeto detectado
+            
+            # Extraer los datos de la caja delimitadora
+            x1, y1, x2, y2 = int(boxes[i,0]), int(boxes[i,1]), int(boxes[i,2]), int(boxes[i,3]) # Coordenadas de la caja delimitadora
+            conf, class_index = boxes[i, 4], int(boxes[i, 5]) # Extraer la confianza y el índice de la clase de la predicción
+
+            # Calcular las cordenadas del centro de la caja delimitadora
+            x = int((x1+x2)/2) # coordenada horizontal del centro de la caja delimitadora
+            y = int((y1+y2)/2) # coordenada vertical del centro de la caja delimitadora
+
+            # Dibujar en el fotograma actual marcas de interés
+            label = f"{labelMap[class_index]}: {conf:.2f}" # Crear etiqueta de la clase predicha
+            frame = cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, 1) # Dibujar caja de detección
+            (w, h), _ = cv2.getTextSize(label, FontFace, 0.3, 1) # Obtener el ancho y alto de la etiqueta
+            frame = cv2.rectangle(frame, (x1, y1 - 2*h), (x1 + w, y1), BoxesColor, -1) # Dibuja el recuadro de la etiqueta
+            frame = cv2.putText(frame, label, (x1, y1 - 5), FontFace, 0.3, TextColor, 1) # Dibuja el texto de la etiqueta
+            frame = cv2.circle(frame, (x, y), 2, CircleColor, 2) # Dibuja un círculo en el centro de la caja de detección
+    
+    # Mostar el fotograma en una ventana
+    fps = 1 / (time.time() - start_frame_time) # Calcular FPS
+    cv2.putText(frame, "FPS: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.75, TextColor) # Mostrar FPS
+    cv2.imshow("YOLOv5Hands", frame)  # Mostrar frame en pantalla
