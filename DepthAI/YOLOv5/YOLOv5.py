@@ -81,30 +81,36 @@ def GetBoundingBoxes(q_nn_input, q_nn):
 
 # Calcular FPS y mostrar en pantalla
 def Show_FPS(frame_count, start_time):
+    global fps
     frame_count += 1
     fps = frame_count / (time.time() - start_time)
     start_time = time.time()
-    cv2.putText(frame, "FPS: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.75, (255, 255, 255))
+    cv2.putText(frame, "FPS: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.75, TextColor)
 
-start_time = time.time()
-frame_count = 0
+fps = 0
+start_frame_time = 0
 BoxesColor = (0, 255, 0)
+TextColor = (255,255,255)
+FontFace = cv2.FONT_HERSHEY_TRIPLEX # Fuente de texto 
 while True:
-    
-    
     frame, boxes = GetBoundingBoxes(q_nn_input, q_nn) # Obtener fotograma de la cámara y las cajas de detección
-    if boxes is not None: # Si hay objetos detectados
+    if boxes is not None and boxes.ndim != 0: # Si hay objetos detectados
+
         for i in range(boxes.shape[0]): # Para cada objeto detectado
             x1, y1, x2, y2 = int(boxes[i,0]), int(boxes[i,1]), int(boxes[i,2]), int(boxes[i,3])
-            conf, class_index = boxes[i, 4], int(boxes[i, 5])
-            label = f"{labelMap[class_index]}: {conf:.2f}"
-            frame = cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, 1)
-            (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.3, 1)# Obtener el ancho y alto de la etiqueta
-            frame = cv2.rectangle(frame, (x1, y1 - 2*h), (x1 + w, y1), BoxesColor, -1)# muestra el texto de la etiqueta
-            frame = cv2.putText(frame, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,255,255), 1)
-    
-    Show_FPS(frame_count, start_time) # Mostrar FPS en el frame
+            conf, class_index = boxes[i, 4], int(boxes[i, 5]) # Extraer la confianza y el índice de la clase de la predicción
+            label = f"{labelMap[class_index]}: {conf:.2f}" # Crear etiqueta de la clase predicha
+            frame = cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, 1) # Dibujar caja de detección
+            (w, h), _ = cv2.getTextSize(label, FontFace, 0.3, 1) # Obtener el ancho y alto de la etiqueta
+            frame = cv2.rectangle(frame, (x1, y1 - 2*h), (x1 + w, y1), BoxesColor, -1) # Dibuja el recuadro de la etiqueta
+            frame = cv2.putText(frame, label, (x1, y1 - 5), FontFace, 0.3, TextColor, 1) # Dibuja el texto de la etiqueta
+
+    cv2.putText(frame, "FPS: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.75, TextColor) # Mostrar FPS
     cv2.imshow("YOLOv5Hands", frame)  # Mostrar frame en pantalla
+
+    fps = 1 / (time.time() - start_frame_time) # Calcular FPS
+    start_frame_time = time.time() # Reiniciar el contador de tiempo
+   
 
     # Salir del programa si alguna de estas teclas son presionadas {ESC, q, SPACE} 
     if cv2.waitKey(1) in [27, ord('q'), 32]:
