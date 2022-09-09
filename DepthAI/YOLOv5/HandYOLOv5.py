@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
 
-import os, subprocess, serial
-from re import T
+import os, time
+import numpy as np
 import cv2
 import depthai as dai
+from re import T
 from util.functions import non_max_suppression
-import time
-import numpy as np
+from mediapipe import solutions
 
 # Cambiar la ruta de ejecución aquí
 MainDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(MainDir)
+
+# create a object detector for detect fingers
+hands = solutions.hands.Hands( # create hands object
+		max_num_hands=1,
+		model_complexity=0,
+		min_detection_confidence=0.5,
+		min_tracking_confidence=0.5)
 
 # Ruta del modelo de la red neuronal entrenada para la deteción de objetos y parámetros de entrada
 nn_path = os.path.join(MainDir, './ModelsYOLO', "ModelYOLOv5.blob")

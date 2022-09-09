@@ -74,30 +74,10 @@ def GetBoundingBoxes(q_nn_input, q_nn):
     cols = output.shape[0]//10647# reshape to proper format
     output = np.reshape(output, (10647, cols))
     output = np.expand_dims(output, axis = 0)
-    total_classes = cols - 5
     boxes = non_max_suppression(output, conf_thres=conf_thresh, iou_thres=iou_thresh)
     boxes = np.array(boxes[0])
-    return [frame, boxes, total_classes]
+    return [frame, boxes]
 
-
-def Draw_boxes(frame, boxes, total_classes):
-    ColorBox = (0, 255, 0)
-    if boxes.ndim == 0:
-        return frame
-    else:
-
-        for i in range(boxes.shape[0]): # Para cada objeto detectado
-            x1, y1, x2, y2 = int(boxes[i,0]), int(boxes[i,1]), int(boxes[i,2]), int(boxes[i,3])
-            conf, class_index = boxes[i, 4], int(boxes[i, 5])
-            label = f"{labelMap[class_index]}: {conf:.2f}"
-            frame = cv2.rectangle(frame, (x1, y1), (x2, y2), ColorBox, 1)
-            # Get the width and height of label for bg square
-            (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.3, 1)
-
-            # Shows the text.
-            frame = cv2.rectangle(frame, (x1, y1 - 2*h), (x1 + w, y1), ColorBox, -1)
-            frame = cv2.putText(frame, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,255,255), 1)
-    return frame
 
 # Calcular FPS y mostrar en pantalla
 def Show_FPS(frame_count, start_time):
@@ -108,12 +88,21 @@ def Show_FPS(frame_count, start_time):
 
 start_time = time.time()
 frame_count = 0
+BoxesColor = (0, 255, 0)
 while True:
     
     [frame, boxes, total_classes] = GetBoundingBoxes(q_nn_input, q_nn)
     
+    
     if boxes is not None: # Si hay objetos detectados
-        frame = Draw_boxes(frame, boxes, total_classes)
+        for i in range(boxes.shape[0]): # Para cada objeto detectado
+            x1, y1, x2, y2 = int(boxes[i,0]), int(boxes[i,1]), int(boxes[i,2]), int(boxes[i,3])
+            conf, class_index = boxes[i, 4], int(boxes[i, 5])
+            label = f"{labelMap[class_index]}: {conf:.2f}"
+            frame = cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, 1)
+            (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.3, 1)# Obtener el ancho y alto de la etiqueta
+            frame = cv2.rectangle(frame, (x1, y1 - 2*h), (x1 + w, y1), BoxesColor, -1)# muestra el texto de la etiqueta
+            frame = cv2.putText(frame, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,255,255), 1)
     
     Show_FPS(frame_count, start_time) # Mostrar FPS en el frame
     cv2.imshow("YOLOv5Hands", frame)  # Mostrar frame en pantalla
