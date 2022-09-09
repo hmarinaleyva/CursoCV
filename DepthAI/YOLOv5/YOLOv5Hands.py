@@ -23,11 +23,11 @@ labelMap = [        # Establecer el mapa de etiquetas de la red neuronal
     "Pájaro", "Gato", "Perro", "Caballo", "Oveja", "Vaca", "Elefante",
     "Oso", "Cebra", "Jirafa", "Mochila", "Paraguas", "Bolso", "Corbata",
     "Maleta", "Frisbee", "Esquís", "Snowboard", "Pelota", "Cometa", "Bate",
-    "Guante", "Monopatín", "tabla de surf", "raqueta de tenis", "Botella", "Copa", "taza",
+    "Guante", "Monopatín", "Surf", "raqueta de tenis", "Botella", "Copa", "taza",
     "Tenedor", "Cuchillo", "Cuchara", "Cuenco", "Plátano", "Manzana", "Sándwich",
     "Naranja", "Brócoli", "Zanahoria", "Hot-Hog", "Pizza", "Dona", "Pastel",
     "Silla", "Sofá", "Maceta", "Cama", "Comedor", "Baño", "TV",
-    "portátil", "Ratón", "mando", "Teclado", "SmartPhone", "Microondas", "Horno",
+    "Portátil", "Ratón", "mando", "Teclado", "SmartPhone", "Microondas", "Horno",
     "Tostadora", "Fregadero", "Nevera", "Libro", "Reloj", "Jarrón", "Tijeras",
     "Peluche", "Secador", "Cepillo"
 ]
@@ -36,7 +36,6 @@ def GetBoundingBoxes():
     in_nn_input = q_nn_input.get()
     in_nn = q_nn.get()
     frame = in_nn_input.getCvFrame()
-    layers = in_nn.getAllLayers()
     output = np.array(in_nn.getLayerFp16("output"))# get the "output" layer
     cols = output.shape[0]//10647# reshape to proper format
     output = np.reshape(output, (10647, cols))
@@ -48,25 +47,21 @@ def GetBoundingBoxes():
 
 
 def Draw_boxes(frame, boxes, total_classes):
+    ColorBox = (0, 255, 0)
     if boxes.ndim == 0:
         return frame
     else:
-        # define class colors
-        color = (0,0,0) #
 
-        for i in range(boxes.shape[0]):
+        for i in range(boxes.shape[0]): # Para cada objeto detectado
             x1, y1, x2, y2 = int(boxes[i,0]), int(boxes[i,1]), int(boxes[i,2]), int(boxes[i,3])
             conf, class_index = boxes[i, 4], int(boxes[i, 5])
-
             label = f"{labelMap[class_index]}: {conf:.2f}"
-
-            frame = cv2.rectangle(frame, (x1, y1), (x2, y2), (0,0,0), 1)
-
+            frame = cv2.rectangle(frame, (x1, y1), (x2, y2), ColorBox, 1)
             # Get the width and height of label for bg square
             (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.3, 1)
 
             # Shows the text.
-            frame = cv2.rectangle(frame, (x1, y1 - 2*h), (x1 + w, y1), color, -1)
+            frame = cv2.rectangle(frame, (x1, y1 - 2*h), (x1 + w, y1), ColorBox, -1)
             frame = cv2.putText(frame, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,255,255), 1)
     return frame
 
@@ -113,21 +108,21 @@ q_nn = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 start_time = time.time()
 counter = 0
 fps = 0
-layer_info_printed = False
 while True:
     [frame, boxes, total_classes] = GetBoundingBoxes()
 
     if boxes is not None:
         frame = Draw_boxes(frame, boxes, total_classes)
-    cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, (255, 0, 0))
-    cv2.imshow("nn_input", frame)
+    
 
-    # Calcular FPS
+    
+    # Calcular FPS y mostrar en pantalla
     counter += 1
-    if (time.time() - start_time) > 1:
-        fps = counter / (time.time() - start_time)
-        counter = 0
-        start_time = time.time()
+    fps = counter / (time.time() - start_time)
+    counter = 0
+    start_time = time.time()
+    cv2.putText(frame, "FPS: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.75, (255, 255, 255))
+    cv2.imshow("YOLOv5Hands", frame)
 
     # Salir del programa si alguna de estas teclas son presionadas {ESC, q, SPACE} 
     if cv2.waitKey(1) in [27, ord('q'), 32]:
