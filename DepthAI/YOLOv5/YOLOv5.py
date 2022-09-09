@@ -18,18 +18,18 @@ conf_thresh = 0.3   # Establecer el umbral de confianza
 iou_thresh = 0.4    # Establecer el umbral de IoU de NMS
 nn_shape = 416      # resolución de la imagen de entrada de la red neuronal
 labelMap = [        # Establecer el mapa de etiquetas de la red neuronal
-    "Persona", "Bicicleta", "Auto", "Moto", "Avión", "Autobús", "Tren",
-    "Camión", "Barco", "Semáforo", "Grifo", "Stop", "Parquímetro", "Banco",
-    "Pájaro", "Gato", "Perro", "Caballo", "Oveja", "Vaca", "Elefante",
-    "Oso", "Cebra", "Jirafa", "Mochila", "Paraguas", "Bolso", "Corbata",
-    "Maleta", "Frisbee", "Esquís", "Snowboard", "Pelota", "Cometa", "Bate",
-    "Guante", "Monopatín", "Surf", "raqueta de tenis", "Botella", "Copa", "taza",
-    "Tenedor", "Cuchillo", "Cuchara", "Cuenco", "Plátano", "Manzana", "Sándwich",
-    "Naranja", "Brócoli", "Zanahoria", "Hot-Hog", "Pizza", "Dona", "Pastel",
-    "Silla", "Sofá", "Maceta", "Cama", "Comedor", "Baño", "TV",
-    "Portátil", "Ratón", "mando", "Teclado", "SmartPhone", "Microondas", "Horno",
-    "Tostadora", "Fregadero", "Nevera", "Libro", "Reloj", "Jarrón", "Tijeras",
-    "Peluche", "Secador", "Cepillo"
+    "Persona",   "Bicicleta", "Auto",      "Moto",      "Avión",      "Autobús",     "Tren",
+    "Camión",    "Barco",     "Semáforo",  "Grifo",     "Stop",       "Parquímetro", "Banco",
+    "Pájaro",    "Gato",      "Perro",     "Caballo",   "Oveja",      "Vaca",        "Elefante",
+    "Oso",       "Cebra",     "Jirafa",    "Mochila",   "Paraguas",   "Bolso",       "Corbata",
+    "Maleta",    "Frisbee",   "Esquís",    "Snowboard", "Pelota",     "Cometa",      "Bate",
+    "Guante",    "Monopatín", "Surf",      "Raqueta",   "Botella",    "Copa",        "Taza",
+    "Tenedor",   "Cuchillo",  "Cuchara",   "Cuenco",    "Plátano",    "Manzana",     "Sándwich",
+    "Naranja",   "Brócoli",   "Zanahoria", "Hot-Hog",   "Pizza",      "Dona",        "Pastel",
+    "Silla",     "Sofá",      "Maceta",    "Cama",      "Comedor",    "Baño",        "TV",
+    "Portátil",  "Ratón",     "mando",     "Teclado",   "SmartPhone", "Microondas",  "Horno",
+    "Tostadora", "Fregadero", "Nevera",    "Libro",     "Reloj",      "Jarrón",      "Tijeras",
+    "Peluche",   "Secador",   "Cepillo"
 ]
 
 # Start defining a pipeline
