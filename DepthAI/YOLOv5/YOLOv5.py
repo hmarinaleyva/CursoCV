@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-import os, subprocess, serial
-from re import T
+import os, time
 import cv2
 import depthai as dai
-from util.functions import non_max_suppression
-import time
 import numpy as np
+from util.functions import non_max_suppression
+from re import T
+
 
 # Cambiar la ruta de ejecución aquí
 MainDir = os.path.dirname(os.path.abspath(__file__))
