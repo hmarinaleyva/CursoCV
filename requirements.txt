@@ -17,3 +17,4 @@ serial==0.0.97
 virtualenv==20.16.2
 torch==1.12.1
 torchvision==0.13.1
+pipenv==2022.9.8
