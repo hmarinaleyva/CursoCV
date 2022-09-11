@@ -63,7 +63,6 @@ q_nn_input = device.getOutputQueue(name="nn_input", maxSize=4, blocking=False)
 q_nn = device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 
 
-
 def GetBoundingBoxes(q_nn_input, q_nn):    
     in_nn_input = q_nn_input.get()
     in_nn = q_nn.get()

@@ -135,6 +135,7 @@ class HandTracker:
             print(f"Internal camera FPS set to: {self.internal_fps}")
             if resolution == "full":
                 self.resolution = (1920, 1080)
+#                
             elif resolution == "ultra":
                 self.resolution = (3840, 2160)
             else:

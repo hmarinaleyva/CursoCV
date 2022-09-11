@@ -1,5 +1,16 @@
 #!/usr/bin/env python3
 
+import serial, subprocess
+
+try:
+    InfoBoard = subprocess.getoutput('arduino-cli board list').split()
+    PuertoArduino  = InfoBoard[9] # Obtener el puerto de la placa Arduino
+    FQBN  = InfoBoard[16] # Obtener el FQBN de la placa Arduino
+    ArduinoSerial = serial.Serial(PuertoArduino, 9600, timeout=1) # open the serial port
+except:
+    print("No se estableció comunicación serial con una placa Arduino correctamente")
+    exit()
+
 import os, time
 import cv2
 import depthai as dai
@@ -99,6 +110,8 @@ while True:
 
     # Obtener fotograma de la cámara OAK-D y la salida de la red neuronal compilada en el dispositivo
     frame, boxes = GetBoundingBoxes(q_nn_input, q_nn)
+
+
 
     # Si hay objetos detectados 
     if boxes is not None and boxes.ndim != 0:
