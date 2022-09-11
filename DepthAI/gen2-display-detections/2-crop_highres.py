@@ -5,16 +5,36 @@ import depthai as dai
 import numpy as np
 import blobconverter
 from utility import *
+import os, time
+
+# Cambiar la ruta de ejecución aquí
+MainDir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(MainDir)
 
 # MobilenetSSD label texts
 labelMap = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
             "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
+labelMap = [ # Establecer el mapa de etiquetas de la red neuronal
+    "Persona",   "Bicicleta", "Auto",      "Moto",      "Avión",      "Autobús",     "Tren",
+    "Camión",    "Barco",     "Semáforo",  "Grifo",     "Stop",       "Parquímetro", "Banco",
+    "Pájaro",    "Gato",      "Perro",     "Caballo",   "Oveja",      "Vaca",        "Elefante",
+    "Oso",       "Cebra",     "Jirafa",    "Mochila",   "Paraguas",   "Bolso",       "Corbata",
+    "Maleta",    "Frisbee",   "Esquís",    "Snowboard", "Pelota",     "Cometa",      "Bate",
+    "Guante",    "Monopatín", "Surf",      "Raqueta",   "Botella",    "Copa",        "Taza",
+    "Tenedor",   "Cuchillo",  "Cuchara",   "Cuenco",    "Plátano",    "Manzana",     "Sándwich",
+    "Naranja",   "Brócoli",   "Zanahoria", "Hot-Hog",   "Pizza",      "Dona",        "Pastel",
+    "Silla",     "Sofá",      "Maceta",    "Cama",      "Comedor",    "Baño",        "TV",
+    "Portátil",  "Ratón",     "mando",     "Teclado",   "SmartPhone", "Microondas",  "Horno",
+    "Tostadora", "Fregadero", "Nevera",    "Libro",     "Reloj",      "Jarrón",      "Tijeras",
+    "Peluche",   "Secador",   "Cepillo"
+]
+
 # Create pipeline
 pipeline = dai.Pipeline()
 
 camRgb = pipeline.create(dai.node.ColorCamera)
-camRgb.setPreviewSize(300, 300)
+camRgb.setPreviewSize(416, 416)
 camRgb.setInterleaved(False)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_4_K)
 camRgb.setIspScale(1,3) # You don't need to downscale (4k -> 720P) video frames
@@ -28,7 +48,7 @@ camRgb.video.link(xoutFrames.input)
 # Define a neural network that will make predictions based on the source frames
 nn = pipeline.create(dai.node.MobileNetDetectionNetwork)
 nn.setConfidenceThreshold(0.5)
-nn.setBlobPath(blobconverter.from_zoo(name="mobilenet-ssd", shaves=6))
+nn.setBlobPath('YOLOv5sDefault.blob')
 camRgb.preview.link(nn.input)
 
 passthroughOut = pipeline.create(dai.node.XLinkOut)
@@ -58,8 +78,8 @@ with dai.Device(pipeline) as device:
     def displayFrame(name, frame):
         for detection in detections:
             bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-            text.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20))
-            text.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40))
+            #text.putText(frame, labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20))
+            #text.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40))
             text.rectangle(frame, bbox)
         # Show the frame
         cv2.imshow(name, frame)
