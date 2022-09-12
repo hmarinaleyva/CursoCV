@@ -2,7 +2,7 @@
 
 import serial, subprocess
 
-try:
+try: # try to open the serial port
     InfoBoard = subprocess.getoutput('arduino-cli board list').split()
     PuertoArduino  = InfoBoard[9] # Obtener el puerto de la placa Arduino
     FQBN  = InfoBoard[16] # Obtener el FQBN de la placa Arduino
