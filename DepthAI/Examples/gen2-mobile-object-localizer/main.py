@@ -52,7 +52,7 @@ def plot_boxes(frame, boxes, colors, scores):
 # --------------- Pipeline ---------------
 pipeline = dai.Pipeline()
 
-pipeline.setOpenVINOVersion(version = dai.OpenVINO.VERSION_2021_4)
+pipeline.setOpenVINOVersion(version = dai.OpenVINO.VERSION_2022_1)
 
 # Define a neural network that will make predictions based on the source frames
 detection_nn = pipeline.create(dai.node.NeuralNetwork)
@@ -118,6 +118,7 @@ with dai.Device(pipeline) as device:
         frame_manip = cv2.cvtColor(frame_manip, cv2.COLOR_RGB2BGR)
 
         # get outputs
+        print(np.array(in_nn.getLayerFp16("ExpandDims")))
         detection_boxes = np.array(in_nn.getLayerFp16("ExpandDims")).reshape((100, 4))
         detection_scores = np.array(in_nn.getLayerFp16("ExpandDims_2")).reshape((100,))
 
