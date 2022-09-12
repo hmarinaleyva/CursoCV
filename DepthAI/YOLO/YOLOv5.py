@@ -11,10 +11,10 @@ MainDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(MainDir)
 
 # Ruta del modelo de la red neuronal entrenada para la deteción de objetos y parámetros de entrada
-nn_path = os.path.join(MainDir, './YoloModels', "YOLOv5sDefault.blob")
+nn_path = os.path.join(MainDir, './YoloModels', "Metro.blob")
 conf_thresh = 0.3   # Establecer el umbral de confianza
 iou_thresh = 0.4    # Establecer el umbral de IoU de NMS
-nn_shape = 416      # resolución de la imagen de entrada de la red neuronal
+nn_shape = 640      # resolución de la imagen de entrada de la red neuronal
 labelMap = [        # Establecer el mapa de etiquetas de la red neuronal
     "Persona",   "Bicicleta", "Auto",      "Moto",      "Avión",      "Autobús",     "Tren",
     "Camión",    "Barco",     "Semáforo",  "Grifo",     "Stop",       "Parquímetro", "Banco",
