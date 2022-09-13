@@ -31,15 +31,15 @@ nn = nm.createNN(pipeline=pm.pipeline, nodes=pm.nodes, source=Previews.color.nam
 pm.addNn(nn)
 
 
-# Nombre del modelo de la red neuronal entrenada para la deteción de objetos para MyriadX
-ModelName = "yolov5s_openvino_2021.4_6shave.blob"
+
+###############################################################################
+
 
 # Anhcho y alto de la imagen de entrada a la red neuronal
 width, height = 640, 480
 
 # Ruta absoluta del modelo
 nnBlobPath = MODEL_PATH
-
 
 # Tiny yolo v3/4 label texts
 labelMap = [
@@ -56,8 +56,6 @@ labelMap = [
     "toaster",        "sink",       "refrigerator",  "book",          "clock",       "vase",          "scissors",
     "teddy bear",     "hair drier", "toothbrush"
 ]
-
-
 
 # Create pipeline
 pipeline = dai.Pipeline()
@@ -129,109 +127,132 @@ stereo.depth.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
 spatialDetectionNetwork.outNetwork.link(nnNetworkOut.input)
 
-
-
-
 # Connect to device and start pipeline
-with dai.Device(pipeline) as device:
+device =dai.Device(pipeline)
 
-    # Output queues will be used to get the rgb frames and nn data from the outputs defined above
-    previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
-    detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
-    xoutBoundingBoxDepthMappingQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
-    depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
-    networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False);
+################################################
 
-    # Coordenadas del centro de la imagen
-    x0 = width//2
-    y0 = height//2
+# Output queues will be used to get the rgb frames and nn data from the outputs defined above
+previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
+detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
+xoutBoundingBoxDepthMappingQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
+depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
+networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False);
 
-    # Estilos de dibujo
-    BoxesColor = (0, 255, 0)
-    LineColor = (0, 0, 255)
-    CircleColor = (255, 0, 0)
-    TextColor = (255,255,255)
-    FontFace = cv2.FONT_HERSHEY_SIMPLEX#cv2.FONT_HERSHEY_TRIPLEX # Fuente de texto
+# Coordenadas del centro de la imagen
+x0 = width//2
+y0 = height//2
 
-    # Variables de tiempo y velocidad 
-    fps = 0
-    start_frame_time = 0
+# Estilos de dibujo
+BoxesColor = (0, 255, 0)
+LineColor = (0, 0, 255)
+CircleColor = (255, 0, 0)
+TextColor = (255,255,255)
+FontFace = cv2.FONT_HERSHEY_SIMPLEX#cv2.FONT_HERSHEY_TRIPLEX # Fuente de texto
 
-    startTime = time.monotonic()
-    counter = 0
-    fps = 0
-    printOutputLayersOnce = True
+# Variables de tiempo y velocidad 
+fps = 0
+start_frame_time = 0
 
-    while True:
-        inPreview = previewQueue.get()
-        inDet = detectionNNQueue.get()
-        depth = depthQueue.get()
-        inNN = networkQueue.get()
+startTime = time.monotonic()
+counter = 0
+fps = 0
+printOutputLayersOnce = True
 
-        if printOutputLayersOnce:
-            toPrint = 'Output layer names:'
-            for ten in inNN.getAllLayerNames():
-                toPrint = f'{toPrint} {ten},'
-            print(toPrint)
-            printOutputLayersOnce = False;
+while True:
+    inPreview = previewQueue.get()
+    inDet = detectionNNQueue.get()
+    depth = depthQueue.get()
+    inNN = networkQueue.get()
 
-        frame = inPreview.getCvFrame()
-        depthFrame = depth.getFrame() # depthFrame values are in millimeters
+    if printOutputLayersOnce:
+        toPrint = 'Output layer names:'
+        for ten in inNN.getAllLayerNames():
+            toPrint = f'{toPrint} {ten},'
+        print(toPrint)
+        printOutputLayersOnce = False;
 
-        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-        depthFrameColor = cv2.equalizeHist(depthFrameColor)
-        depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
+    frame = inPreview.getCvFrame()
+    depthFrame = depth.getFrame() # depthFrame values are in millimeters
 
-        counter+=1
-        current_time = time.monotonic()
-        if (current_time - startTime) > 0.01 : # every 10 ms
-            fps = counter / (current_time - startTime)
-            counter = 0
-            startTime = current_time
+    depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
+    depthFrameColor = cv2.equalizeHist(depthFrameColor)
+    depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
-        detections = inDet.detections
-        if len(detections) != 0:
-            boundingBoxMapping = xoutBoundingBoxDepthMappingQueue.get()
-            roiDatas = boundingBoxMapping.getConfigData()
+    counter+=1
+    current_time = time.monotonic()
+    if (current_time - startTime) > 0.01 : # every 10 ms
+        fps = counter / (current_time - startTime)
+        counter = 0
+        startTime = current_time
 
-            for roiData in roiDatas:
-                roi = roiData.roi
-                roi = roi.denormalize(depthFrameColor.shape[1], depthFrameColor.shape[0])
-                topLeft = roi.topLeft()
-                bottomRight = roi.bottomRight()
-                xmin = int(topLeft.x)
-                ymin = int(topLeft.y)
-                xmax = int(bottomRight.x)
-                ymax = int(bottomRight.y)
+    detections = inDet.detections
+    if len(detections) != 0:
+        boundingBoxMapping = xoutBoundingBoxDepthMappingQueue.get()
+        roiDatas = boundingBoxMapping.getConfigData()
 
-                cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), TextColor, FontFace)
+        for roiData in roiDatas:
+            roi = roiData.roi
+            roi = roi.denormalize(depthFrameColor.shape[1], depthFrameColor.shape[0])
+            topLeft = roi.topLeft()
+            bottomRight = roi.bottomRight()
+            xmin = int(topLeft.x)
+            ymin = int(topLeft.y)
+            xmax = int(bottomRight.x)
+            ymax = int(bottomRight.y)
+
+            cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), TextColor, FontFace)
 
 
-        # If the frame is available, draw bounding boxes on it and show the frame
-        height = frame.shape[0]
-        width  = frame.shape[1]
-        for detection in detections:
-            # Denormalize bounding box
-            x1 = int(detection.xmin * width)
-            x2 = int(detection.xmax * width)
-            y1 = int(detection.ymin * height)
-            y2 = int(detection.ymax * height)
-            try:
-                label = labelMap[detection.label]
-            except:
-                label = detection.label
-            cv2.putText(frame, str(label), (x1 + 10, y1 + 20), FontFace, 0.5, 255)
-            cv2.putText(frame, "{:.2f}".format(detection.confidence*100), (x1 + 10, y1 + 35), FontFace, 0.5, 255)
-            cv2.putText(frame, f"X: {int(detection.spatialCoordinates.x)} mm", (x1 + 10, y1 + 50), FontFace, 0.5, 255)
-            cv2.putText(frame, f"Y: {int(detection.spatialCoordinates.y)} mm", (x1 + 10, y1 + 65), FontFace, 0.5, 255)
-            cv2.putText(frame, f"Z: {int(detection.spatialCoordinates.z)} mm", (x1 + 10, y1 + 80), FontFace, 0.5, 255)
+    # If the frame is available, draw bounding boxes on it and show the frame
+    height = frame.shape[0]
+    width  = frame.shape[1]
+    for detection in detections:
+        # Denormalize bounding box
+        x1 = int(detection.xmin * width)
+        x2 = int(detection.xmax * width)
+        y1 = int(detection.ymin * height)
+        y2 = int(detection.ymax * height)
+        try:
+            label = labelMap[detection.label]
+        except:
+            label = detection.label
+        cv2.putText(frame, str(label), (x1 + 10, y1 + 20), FontFace, 0.5, 255)
+        cv2.putText(frame, "{:.2f}".format(detection.confidence*100), (x1 + 10, y1 + 35), FontFace, 0.5, 255)
+        cv2.putText(frame, f"X: {int(detection.spatialCoordinates.x)} mm", (x1 + 10, y1 + 50), FontFace, 0.5, 255)
+        cv2.putText(frame, f"Y: {int(detection.spatialCoordinates.y)} mm", (x1 + 10, y1 + 65), FontFace, 0.5, 255)
+        cv2.putText(frame, f"Z: {int(detection.spatialCoordinates.z)} mm", (x1 + 10, y1 + 80), FontFace, 0.5, 255)
 
-            cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, FontFace)
+        cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, FontFace)
 
-        cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.4, TextColor)
-        cv2.imshow("depth", depthFrameColor)
-        cv2.imshow("rgb", frame)
+    cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.4, TextColor)
+    cv2.imshow("depth", depthFrameColor)
+    cv2.imshow("rgb", frame)
 
-        # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
-        if cv2.waitKey(1) in [27, 32, ord('q')]:
-            break
+    # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
+    if cv2.waitKey(1) in [27, 32, ord('q')]:
+        break
+
+################################################
+device = dai.Device(pm.pipeline)
+pv.createQueues(device)
+nm.createQueues(device)
+nnData = []
+
+while True:
+
+    # parse outputs
+    pv.prepareFrames()
+    inNn = nm.outputQueue.tryGet()
+
+    if inNn is not None:
+        nnData = nm.decode(inNn)
+        # count FPS
+        fpsHandler.tick("color")
+
+    nm.draw(pv, nnData)
+    pv.showFrames()
+
+    # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
+    if cv2.waitKey(1) in [27, 32, ord('q')]:
+        break
