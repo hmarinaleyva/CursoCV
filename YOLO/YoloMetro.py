@@ -8,8 +8,8 @@ MainDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(MainDir)
 
 # Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
-MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel', "Metro_openvino_2021.4_6shave.blob")
-CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel', "Metro.json")
+MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
+CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
 
 # initialize blob manager with path to the blob
 bm = BlobManager(blobPath=MODEL_PATH)
@@ -54,4 +54,3 @@ with dai.Device(pm.pipeline) as device:
         # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
         if cv2.waitKey(1) in [27, 32, ord('q')]:
             break
-
