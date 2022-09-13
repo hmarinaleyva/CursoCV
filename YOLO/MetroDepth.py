@@ -1,4 +1,3 @@
-
 from depthai_sdk import Previews, FPSHandler
 from depthai_sdk.managers import PipelineManager, PreviewManager, BlobManager, NNetManager
 import depthai as dai
@@ -12,10 +11,24 @@ os.chdir(MainDir)
 # Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
 MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
 CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
+
+# inicializar el BlobManager con la ruta al archivo .blob
+bm = BlobManager(blobPath=MODEL_PATH)
+nm = NNetManager(nnFamily="YOLO", inputSize=4)
+nm.readConfig(CONFIG_PATH)  # this will also parse the correct input size
 # initialize blob manager with path to the blob
 bm = BlobManager(blobPath=MODEL_PATH)
-
-
+nm = NNetManager(nnFamily="YOLO", inputSize=4)
+nm.readConfig(CONFIG_PATH)  # this will also parse the correct input size
+pm = PipelineManager()
+pm.createColorCam(previewSize=nm.inputSize, xout=True)
+# create preview manager
+fpsHandler = FPSHandler()
+pv = PreviewManager(display=[Previews.color.name], fpsHandler=fpsHandler)
+# create NN with managers
+nn = nm.createNN(pipeline=pm.pipeline, nodes=pm.nodes, source=Previews.color.name,
+                 blobPath=bm.getBlob(shaves=6, openvinoVersion=pm.pipeline.getOpenVINOVersion(), zooType="depthai"))
+pm.addNn(nn)
 
 
 # Nombre del modelo de la red neuronal entrenada para la deteción de objetos para MyriadX
@@ -25,7 +38,7 @@ ModelName = "yolov5s_openvino_2021.4_6shave.blob"
 width, height = 640, 480
 
 # Ruta absoluta del modelo
-nnBlobPath = os.path.join(MainDir, '../Models/YOLOv5/yolov5s', ModelName )
+nnBlobPath = MODEL_PATH
 
 
 # Tiny yolo v3/4 label texts
@@ -44,7 +57,7 @@ labelMap = [
     "teddy bear",     "hair drier", "toothbrush"
 ]
 
-syncNN = True
+
 
 # Create pipeline
 pipeline = dai.Pipeline()
@@ -93,22 +106,21 @@ spatialDetectionNetwork.setDepthLowerThreshold(100)
 spatialDetectionNetwork.setDepthUpperThreshold(5000)
 
 # Yolo specific parameters
-spatialDetectionNetwork.setNumClasses(80)
+spatialDetectionNetwork.setNumClasses(11)
 spatialDetectionNetwork.setCoordinateSize(4)
-spatialDetectionNetwork.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
+#spatialDetectionNetwork.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
 #spatialDetectionNetwork.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })
+spatialDetectionNetwork.setAnchors([10,13,16,30,33,23,30,61,62,45,59,119,116,90,156,198,373,326])
 spatialDetectionNetwork.setAnchorMasks({ "side80": [1,2,3], "side40": [3,4,5], "side20": [6,7,8] })
 spatialDetectionNetwork.setIouThreshold(0.5)
+spatialDetectionNetwork.setConfidenceThreshold(0.5)
 
 # Linking
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 
 camRgb.preview.link(spatialDetectionNetwork.input)
-if syncNN:
-    spatialDetectionNetwork.passthrough.link(xoutRgb.input)
-else:
-    camRgb.preview.link(xoutRgb.input)
+spatialDetectionNetwork.passthrough.link(xoutRgb.input)
 
 spatialDetectionNetwork.out.link(xoutNN.input)
 spatialDetectionNetwork.boundingBoxMapping.link(xoutBoundingBoxDepthMapping.input)
