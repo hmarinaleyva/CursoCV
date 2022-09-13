@@ -10,12 +10,15 @@ import os, time
 MainDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(MainDir)
 
-# Ruta del modelo de la red neuronal entrenada para la deteción de objetos y parámetros de entrada
-ModelName = "yolov5n_coco_416x416.blob"
-nnBlobPath = os.path.join(MainDir, '../models', ModelName )
+# Nombre del modelo de la red neuronal entrenada para la deteción de objetos para MyriadX
+ModelName = "yolo-v4-tiny-tf_openvino_2021.4_6shave.blob"
 
 # Anhcho y alto de la imagen de entrada a la red neuronal
-width,height = 416, 416
+width,height = 416,416
+
+# Ruta absoluta del modelo
+nnBlobPath = os.path.join(MainDir, '../models', ModelName )
+
 
 # Tiny yolo v3/4 label texts
 labelMap = [
@@ -86,7 +89,6 @@ spatialDetectionNetwork.setNumClasses(80)
 spatialDetectionNetwork.setCoordinateSize(4)
 spatialDetectionNetwork.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
 spatialDetectionNetwork.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })
-#spatialDetectionNetwork.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })
 spatialDetectionNetwork.setIouThreshold(0.5)
 
 # Linking
@@ -106,6 +108,9 @@ stereo.depth.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
 spatialDetectionNetwork.outNetwork.link(nnNetworkOut.input)
 
+
+
+
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 
@@ -116,10 +121,24 @@ with dai.Device(pipeline) as device:
     depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
     networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False);
 
+    # Coordenadas del centro de la imagen
+    x0 = width//2
+    y0 = height//2
+
+    # Estilos de dibujo
+    BoxesColor = (0, 255, 0)
+    LineColor = (0, 0, 255)
+    CircleColor = (255, 0, 0)
+    TextColor = (255,255,255)
+    FontFace = cv2.FONT_HERSHEY_SIMPLEX#cv2.FONT_HERSHEY_TRIPLEX # Fuente de texto
+
+    # Variables de tiempo y velocidad 
+    fps = 0
+    start_frame_time = 0
+
     startTime = time.monotonic()
     counter = 0
     fps = 0
-    color = (255, 255, 255)
     printOutputLayersOnce = True
 
     while True:
@@ -144,7 +163,7 @@ with dai.Device(pipeline) as device:
 
         counter+=1
         current_time = time.monotonic()
-        if (current_time - startTime) > 1 :
+        if (current_time - startTime) > 0.01 : # every 10 ms
             fps = counter / (current_time - startTime)
             counter = 0
             startTime = current_time
@@ -164,7 +183,7 @@ with dai.Device(pipeline) as device:
                 xmax = int(bottomRight.x)
                 ymax = int(bottomRight.y)
 
-                cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
+                cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), TextColor, FontFace)
 
 
         # If the frame is available, draw bounding boxes on it and show the frame
@@ -180,18 +199,18 @@ with dai.Device(pipeline) as device:
                 label = labelMap[detection.label]
             except:
                 label = detection.label
-            cv2.putText(frame, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.putText(frame, "{:.2f}".format(detection.confidence*100), (x1 + 10, y1 + 35), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.putText(frame, f"X: {int(detection.spatialCoordinates.x)} mm", (x1 + 10, y1 + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.putText(frame, f"Y: {int(detection.spatialCoordinates.y)} mm", (x1 + 10, y1 + 65), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.putText(frame, f"Z: {int(detection.spatialCoordinates.z)} mm", (x1 + 10, y1 + 80), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.putText(frame, str(label), (x1 + 10, y1 + 20), FontFace, 0.5, 255)
+            cv2.putText(frame, "{:.2f}".format(detection.confidence*100), (x1 + 10, y1 + 35), FontFace, 0.5, 255)
+            cv2.putText(frame, f"X: {int(detection.spatialCoordinates.x)} mm", (x1 + 10, y1 + 50), FontFace, 0.5, 255)
+            cv2.putText(frame, f"Y: {int(detection.spatialCoordinates.y)} mm", (x1 + 10, y1 + 65), FontFace, 0.5, 255)
+            cv2.putText(frame, f"Z: {int(detection.spatialCoordinates.z)} mm", (x1 + 10, y1 + 80), FontFace, 0.5, 255)
 
-            cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, FontFace, cv2.LINE_AA)
 
-        cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
+        cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.4, TextColor)
         cv2.imshow("depth", depthFrameColor)
         cv2.imshow("rgb", frame)
 
         # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
-        if cv2.waitKey(0) in [27, 32, ord('q')]:
+        if cv2.waitKey(1) in [27, 32, ord('q')]:
             break

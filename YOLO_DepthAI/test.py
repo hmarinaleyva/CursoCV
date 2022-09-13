@@ -10,12 +10,15 @@ import os, time
 MainDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(MainDir)
 
-# Ruta del modelo de la red neuronal entrenada para la deteción de objetos y parámetros de entrada
-nnBlobPath = os.path.join(MainDir, '../models', "yolov6n_coco_640x640.blob")
+# Nombre del modelo de la red neuronal entrenada para la deteción de objetos para MyriadX
+ModelName = "yolo-v4-tiny-tf_openvino_2021.4_6shave.blob"
 
 # Anhcho y alto de la imagen de entrada a la red neuronal
-width = 640
-height = 640
+width,height = 416,416
+
+# Ruta absoluta del modelo
+nnBlobPath = os.path.join(MainDir, '../models', ModelName )
+
 
 # Tiny yolo v3/4 label texts
 labelMap = [
@@ -58,7 +61,7 @@ xoutDepth.setStreamName("depth")
 nnNetworkOut.setStreamName("nnNetwork")
 
 # Properties
-camRgb.setPreviewSize(width,height)
+camRgb.setPreviewSize(width, height)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)

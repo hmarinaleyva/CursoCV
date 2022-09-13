@@ -75,17 +75,21 @@ def GetBoundingBoxes(q_nn_input, q_nn):
     boxes = np.array(boxes[0])
     return [frame, boxes]
 
-fps = 0
-start_frame_time = 0
+
+# Coordenadas del centro de la imagen
+x0 = nn_shape//2
+y0 = nn_shape//2
+
+# Estilos de dibujo
 BoxesColor = (0, 255, 0)
 LineColor = (0, 0, 255)
 CircleColor = (255, 0, 0)
 TextColor = (255,255,255)
 FontFace = cv2.FONT_HERSHEY_TRIPLEX # Fuente de texto
 
-# Coordenadas del centro de la imagen
-x0 = nn_shape//2
-y0 = nn_shape//2
+# Variables de tiempo y velocidad 
+fps = 0
+start_frame_time = 0
 
 while True:
     
