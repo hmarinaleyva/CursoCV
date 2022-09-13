@@ -11,10 +11,13 @@ MainDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(MainDir)
 
 # Nombre del modelo de la red neuronal entrenada para la deteción de objetos para MyriadX
-ModelName = "yolo-v4-tiny-tf_openvino_2021.4_6shave.blob"
+ModelName = "yolov5n_coco_416x416.blob"
+ModelName = "yolov6n_coco_640x640.blob"
+ModelName = "yolov6n.blob"
 
 # Anhcho y alto de la imagen de entrada a la red neuronal
-width,height = 416,416
+width, height = 416, 416
+width, height = 640, 640
 
 # Ruta absoluta del modelo
 nnBlobPath = os.path.join(MainDir, '../models', ModelName )
