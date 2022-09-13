@@ -14,7 +14,6 @@ CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json"
 #MODEL_PATH  = os.path.join(MainDir, '../Models/YOLOv7/', "yolov7-tiny_480x640_openvino_2021.4_6shave.blob")
 #CONFIG_PATH = os.path.join(MainDir, '../Models/YOLOv7/', "yolov7-tiny.json")
 
-
 # initialize blob manager with path to the blob
 bm = BlobManager(blobPath=MODEL_PATH)
 
