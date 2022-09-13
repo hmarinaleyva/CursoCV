@@ -11,9 +11,11 @@ MainDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(MainDir)
 
 # Ruta del modelo de la red neuronal entrenada para la deteción de objetos y parámetros de entrada
-nnBlobPath = os.path.join(MainDir, '../models', "yolo-v4-tiny-tf_openvino_2021.4_6shave.blob")
-# nnBlobPath = str((Path(__file__).parent / Path('../models/yolo-v4-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute())
+nnBlobPath = os.path.join(MainDir, '../models', "yolov6n_coco_640x640.blob")
 
+# Anhcho y alto de la imagen de entrada a la red neuronal
+width = 640
+height = 640
 
 # Tiny yolo v3/4 label texts
 labelMap = [
@@ -56,7 +58,7 @@ xoutDepth.setStreamName("depth")
 nnNetworkOut.setStreamName("nnNetwork")
 
 # Properties
-camRgb.setPreviewSize(416, 416)
+camRgb.setPreviewSize(width,height)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
@@ -189,5 +191,6 @@ with dai.Device(pipeline) as device:
         cv2.imshow("depth", depthFrameColor)
         cv2.imshow("rgb", frame)
 
-        if cv2.waitKey(1) == ord('q'):
+        # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
+        if cv2.waitKey(1) in [27, 32, ord('q')]:
             break
