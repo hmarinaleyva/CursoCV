@@ -11,7 +11,7 @@ MainDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(MainDir)
 
 # Ruta del modelo de la red neuronal entrenada para la deteción de objetos y parámetros de entrada
-nnBlobPath = os.path.join(MainDir, './YoloModels', "YOLOv5sDefault.blob")
+nnBlobPath = os.path.join(MainDir, './YoloModels', "yolo-v4-tiny-tf_openvino_2021.4_6shave.blob")
 # nnBlobPath = str((Path(__file__).parent / Path('../models/yolo-v4-tiny-tf_openvino_2021.4_6shave.blob')).resolve().absolute())
 
 
