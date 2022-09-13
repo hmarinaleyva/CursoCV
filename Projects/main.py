@@ -1,11 +1,38 @@
-#!/usr/bin/env python3
-
-import cv2
-import depthai as dai
-from Utilities import *
+from Projects.utilities import *
+from depthai_sdk import Previews, FPSHandler
+from depthai_sdk.managers import PipelineManager, PreviewManager, BlobManager, NNetManager
 import numpy as np
-import math
+import depthai as dai
+import cv2, os, math
 
+# Cambiar la ruta de ejecución aquí
+MainDir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(MainDir)
+
+# Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
+MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
+CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
+
+#MODEL_PATH  = os.path.join(MainDir, '../Models/YOLOv7/', "yolov7-tiny_480x640_openvino_2021.4_6shave.blob")
+#CONFIG_PATH = os.path.join(MainDir, '../Models/YOLOv7/', "yolov7-tiny.json")
+
+# initialize blob manager with path to the blob
+bm = BlobManager(blobPath=MODEL_PATH)
+
+nm = NNetManager(nnFamily="YOLO", inputSize=4)
+nm.readConfig(CONFIG_PATH)  # this will also parse the correct input size
+
+pm = PipelineManager()
+pm.createColorCam(previewSize=nm.inputSize, xout=True)
+
+# create preview manager
+fpsHandler = FPSHandler()
+pv = PreviewManager(display=[Previews.color.name], fpsHandler=fpsHandler)
+
+# create NN with managers
+nn = nm.createNN(pipeline=pm.pipeline, nodes=pm.nodes, source=Previews.color.name,
+                 blobPath=bm.getBlob(shaves=6, openvinoVersion=pm.pipeline.getOpenVINOVersion(), zooType="depthai"))
+pm.addNn(nn)
 # Create pipeline
 pipeline = dai.Pipeline()
 
@@ -71,7 +98,7 @@ with dai.Device(pipeline) as device:
         cv2.imshow("depth", disp)
 
         key = cv2.waitKey(1)
-        if key == ord('q'):
+        if key in [27, 32, ord('q')]: # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q}
             break
         elif key == ord('w'):
             y -= step
