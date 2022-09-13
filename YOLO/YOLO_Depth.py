@@ -11,13 +11,13 @@ MainDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(MainDir)
 
 # Nombre del modelo de la red neuronal entrenada para la deteción de objetos para MyriadX
-ModelName = "yolo-v4-tiny-tf_openvino_2021.4_6shave.blob"
+ModelName = "yolov5s_openvino_2021.4_6shave.blob"
 
 # Anhcho y alto de la imagen de entrada a la red neuronal
-width,height = 416,416
+width, height = 640, 480
 
 # Ruta absoluta del modelo
-nnBlobPath = os.path.join(MainDir, '../models', ModelName )
+nnBlobPath = os.path.join(MainDir, '../Models/YOLOv5/yolov5s', ModelName )
 
 
 # Tiny yolo v3/4 label texts
@@ -88,7 +88,8 @@ spatialDetectionNetwork.setDepthUpperThreshold(5000)
 spatialDetectionNetwork.setNumClasses(80)
 spatialDetectionNetwork.setCoordinateSize(4)
 spatialDetectionNetwork.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
-spatialDetectionNetwork.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })
+#spatialDetectionNetwork.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })
+spatialDetectionNetwork.setAnchorMasks({ "side80": [1,2,3], "side40": [3,4,5], "side20": [6,7,8] })
 spatialDetectionNetwork.setIouThreshold(0.5)
 
 # Linking

@@ -1,26 +1,31 @@
-#!/usr/bin/env python3
 
-from pathlib import Path
-import sys
-import cv2
+from depthai_sdk import Previews, FPSHandler
+from depthai_sdk.managers import PipelineManager, PreviewManager, BlobManager, NNetManager
 import depthai as dai
-import os, time
+
+import cv2, os, time
 
 # Cambiar la ruta de ejecución aquí
 MainDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(MainDir)
 
+# Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
+MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
+CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
+# initialize blob manager with path to the blob
+bm = BlobManager(blobPath=MODEL_PATH)
+
+
+
+
 # Nombre del modelo de la red neuronal entrenada para la deteción de objetos para MyriadX
-ModelName = "yolov5n_coco_416x416.blob"
-ModelName = "yolov6n_coco_640x640.blob"
-ModelName = "yolov6n.blob"
+ModelName = "yolov5s_openvino_2021.4_6shave.blob"
 
 # Anhcho y alto de la imagen de entrada a la red neuronal
-width, height = 416, 416
-width, height = 640, 640
+width, height = 640, 480
 
 # Ruta absoluta del modelo
-nnBlobPath = os.path.join(MainDir, '../models', ModelName )
+nnBlobPath = os.path.join(MainDir, '../Models/YOLOv5/yolov5s', ModelName )
 
 
 # Tiny yolo v3/4 label texts
@@ -91,7 +96,8 @@ spatialDetectionNetwork.setDepthUpperThreshold(5000)
 spatialDetectionNetwork.setNumClasses(80)
 spatialDetectionNetwork.setCoordinateSize(4)
 spatialDetectionNetwork.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
-spatialDetectionNetwork.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })
+#spatialDetectionNetwork.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })
+spatialDetectionNetwork.setAnchorMasks({ "side80": [1,2,3], "side40": [3,4,5], "side20": [6,7,8] })
 spatialDetectionNetwork.setIouThreshold(0.5)
 
 # Linking
@@ -208,7 +214,7 @@ with dai.Device(pipeline) as device:
             cv2.putText(frame, f"Y: {int(detection.spatialCoordinates.y)} mm", (x1 + 10, y1 + 65), FontFace, 0.5, 255)
             cv2.putText(frame, f"Z: {int(detection.spatialCoordinates.z)} mm", (x1 + 10, y1 + 80), FontFace, 0.5, 255)
 
-            cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, FontFace, cv2.LINE_AA)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, FontFace)
 
         cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.4, TextColor)
         cv2.imshow("depth", depthFrameColor)

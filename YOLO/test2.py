@@ -11,8 +11,8 @@ os.chdir(MainDir)
 MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
 CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
 
-MODEL_PATH  = os.path.join(MainDir, '../Models/yolov5s/', "yolov5s_openvino_2021.4_6shave.blob")
-CONFIG_PATH = os.path.join(MainDir, '../Models/yolov5s/', "yolov5s.json")
+#MODEL_PATH  = os.path.join(MainDir, '../Models/YOLOv7/', "yolov7-tiny_480x640_openvino_2021.4_6shave.blob")
+#CONFIG_PATH = os.path.join(MainDir, '../Models/YOLOv7/', "yolov7-tiny.json")
 
 
 # initialize blob manager with path to the blob
