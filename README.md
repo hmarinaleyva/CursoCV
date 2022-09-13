@@ -364,3 +364,6 @@ except:
 
 ![](https://i.imgur.com/sR7fT1E.png)
 
+
+Link YoloV7:
+https://drive.google.com/uc?export=download&id=1TmtLbJdcKftUZ9ybVOlSkKQr-pCD6bYL
