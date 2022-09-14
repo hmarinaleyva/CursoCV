@@ -141,13 +141,6 @@ while True:
     depth = depthQueue.get()
     inNN = networkQueue.get()
 
-    if printOutputLayersOnce:
-        toPrint = 'Output layer names:'
-        for ten in inNN.getAllLayerNames():
-            toPrint = f'{toPrint} {ten},'
-        print(toPrint)
-        printOutputLayersOnce = False;
-
     frame = inPreview.getCvFrame()
     depthFrame = depth.getFrame() # depthFrame values are in millimeters
 
@@ -180,9 +173,6 @@ while True:
             cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), TextColor, FontFace)
 
 
-    # If the frame is available, draw bounding boxes on it and show the frame
-    height = frame.shape[0]
-    width  = frame.shape[1]
     for detection in detections:
         # Denormalize bounding box
         x1 = int(detection.xmin * width)
