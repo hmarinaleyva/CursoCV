@@ -12,50 +12,11 @@ os.chdir(MainDir)
 MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
 CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
 
-# inicializar el BlobManager con la ruta al archivo .blob
-bm = BlobManager(blobPath=MODEL_PATH)
-nm = NNetManager(nnFamily="YOLO", inputSize=4)
-nm.readConfig(CONFIG_PATH)  # this will also parse the correct input size
-# initialize blob manager with path to the blob
-bm = BlobManager(blobPath=MODEL_PATH)
-nm = NNetManager(nnFamily="YOLO", inputSize=4)
-nm.readConfig(CONFIG_PATH)  # this will also parse the correct input size
-pm = PipelineManager()
-pm.createColorCam(previewSize=nm.inputSize, xout=True)
-# create preview manager
-fpsHandler = FPSHandler()
-pv = PreviewManager(display=[Previews.color.name], fpsHandler=fpsHandler)
-# create NN with managers
-nn = nm.createNN(pipeline=pm.pipeline, nodes=pm.nodes, source=Previews.color.name,
-                 blobPath=bm.getBlob(shaves=6, openvinoVersion=pm.pipeline.getOpenVINOVersion(), zooType="depthai"))
-pm.addNn(nn)
-
-
-
-###############################################################################
-
-
 # Anhcho y alto de la imagen de entrada a la red neuronal
 width, height = 640, 480
 
 # Ruta absoluta del modelo
 nnBlobPath = MODEL_PATH
-
-# Tiny yolo v3/4 label texts
-labelMap = [
-    "person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
-    "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
-    "bird",           "cat",        "dog",           "horse",         "sheep",       "cow",           "elephant",
-    "bear",           "zebra",      "giraffe",       "backpack",      "umbrella",    "handbag",       "tie",
-    "suitcase",       "frisbee",    "skis",          "snowboard",     "sports ball", "kite",          "baseball bat",
-    "baseball glove", "skateboard", "surfboard",     "tennis racket", "bottle",      "wine glass",    "cup",
-    "fork",           "knife",      "spoon",         "bowl",          "banana",      "apple",         "sandwich",
-    "orange",         "broccoli",   "carrot",        "hot dog",       "pizza",       "donut",         "cake",
-    "chair",          "sofa",       "pottedplant",   "bed",           "diningtable", "toilet",        "tvmonitor",
-    "laptop",         "mouse",      "remote",        "keyboard",      "cell phone",  "microwave",     "oven",
-    "toaster",        "sink",       "refrigerator",  "book",          "clock",       "vase",          "scissors",
-    "teddy bear",     "hair drier", "toothbrush"
-]
 
 labelMap = [
             "down",
@@ -77,9 +38,12 @@ pipeline = dai.Pipeline()
 # Define sources and outputs
 camRgb = pipeline.create(dai.node.ColorCamera)
 spatialDetectionNetwork = pipeline.create(dai.node.YoloSpatialDetectionNetwork)
+
+# Define sources and outputs for the spatial detection network
 monoLeft = pipeline.create(dai.node.MonoCamera)
 monoRight = pipeline.create(dai.node.MonoCamera)
 stereo = pipeline.create(dai.node.StereoDepth)
+
 nnNetworkOut = pipeline.create(dai.node.XLinkOut)
 
 xoutRgb = pipeline.create(dai.node.XLinkOut)
@@ -118,12 +82,48 @@ spatialDetectionNetwork.setDepthLowerThreshold(100)
 spatialDetectionNetwork.setDepthUpperThreshold(5000)
 
 # Yolo specific parameters
+
 spatialDetectionNetwork.setNumClasses(11)
 spatialDetectionNetwork.setCoordinateSize(4)
 #spatialDetectionNetwork.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
 #spatialDetectionNetwork.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })
-spatialDetectionNetwork.setAnchors([10,13,16,30,33,23,30,61,62,45,59,119,116,90,156,198,373,326])
-spatialDetectionNetwork.setAnchorMasks({ "side80": [1,2,3], "side40": [3,4,5], "side20": [6,7,8] })
+spatialDetectionNetwork.setAnchors([
+                10.0,
+                13.0,
+                16.0,
+                30.0,
+                33.0,
+                23.0,
+                30.0,
+                61.0,
+                62.0,
+                45.0,
+                59.0,
+                119.0,
+                116.0,
+                90.0,
+                156.0,
+                198.0,
+                373.0,
+                326.0
+            ])
+spatialDetectionNetwork.setAnchorMasks({
+                "side80": [
+                    0,
+                    1,
+                    2
+                ],
+                "side40": [
+                    3,
+                    4,
+                    5
+                ],
+                "side20": [
+                    6,
+                    7,
+                    8
+                ]
+            })
 spatialDetectionNetwork.setIouThreshold(0.5)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
 
@@ -174,10 +174,10 @@ fps = 0
 printOutputLayersOnce = True
 
 while True:
-    inPreview = previewQueue.tryGet()
+    inPreview = previewQueue.get()
     inDet = detectionNNQueue.get()
     depth = depthQueue.get()
-    inNN = networkQueue.tryGet()
+    inNN = networkQueue.get()
 
     #if printOutputLayersOnce:
     #    toPrint = 'Output layer names:'

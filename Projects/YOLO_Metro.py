@@ -16,9 +16,8 @@ NNetManager:
     red neuronal automáticamente o mediante el uso de un archivo de controlador externo.
 
 """
-
-
-from depthai_sdk import Previews, FPSHandler
+from depthai_sdk import PipelineManager, NNetManager, PreviewManager, Previews, FPSHandler, toTensorResult
+from depthai_sdk import Previews, FPSHandler, utils
 from depthai_sdk.managers import PipelineManager, PreviewManager, BlobManager, NNetManager
 import depthai as dai
 import cv2, os
@@ -59,19 +58,30 @@ with dai.Device(pm.pipeline) as device:
     pv.createQueues(device)
     nm.createQueues(device)
 
+    xoutBoundingBoxDepthMappingQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
+
     nnData = []
 
     while True:
 
-        # parse outputs
+        #parse outputs
         pv.prepareFrames()
         inNn = nm.outputQueue.tryGet()
+        inDet = nm.outputQueue.get()
 
-        if inNn is not None:
-            nnData = nm.decode(inNn)
-            # count FPS
-            fpsHandler.tick("color")
+        detections = inDet.detections
+        if len(detections) != 0:
+            boundingBoxMapping = xoutBoundingBoxDepthMappingQueue.get()
+            roiDatas = boundingBoxMapping.getConfigData()
+            print(roiDatas)
 
+        #if inNn is not None:
+        #    nnData = nm.decode(inNn)
+        #    fpsHandler.tick("color")
+        #    detections = [ type(Det) for Det in nnData]
+        #    #print(pv.get('host'))
+
+        frame = pv.get(Previews.color.name)
         nm.draw(pv, nnData)
         pv.showFrames()
 
