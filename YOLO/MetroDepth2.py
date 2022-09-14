@@ -70,6 +70,7 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # setting node configs
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+
 # Align depth map to the perspective of RGB camera, on which inference is done
 stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
 stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
@@ -85,45 +86,8 @@ spatialDetectionNetwork.setDepthUpperThreshold(5000)
 
 spatialDetectionNetwork.setNumClasses(11)
 spatialDetectionNetwork.setCoordinateSize(4)
-#spatialDetectionNetwork.setAnchors([10,14, 23,27, 37,58, 81,82, 135,169, 344,319])
-#spatialDetectionNetwork.setAnchorMasks({ "side26": [1,2,3], "side13": [3,4,5] })
-spatialDetectionNetwork.setAnchors([
-                10.0,
-                13.0,
-                16.0,
-                30.0,
-                33.0,
-                23.0,
-                30.0,
-                61.0,
-                62.0,
-                45.0,
-                59.0,
-                119.0,
-                116.0,
-                90.0,
-                156.0,
-                198.0,
-                373.0,
-                326.0
-            ])
-spatialDetectionNetwork.setAnchorMasks({
-                "side80": [
-                    0,
-                    1,
-                    2
-                ],
-                "side40": [
-                    3,
-                    4,
-                    5
-                ],
-                "side20": [
-                    6,
-                    7,
-                    8
-                ]
-            })
+spatialDetectionNetwork.setAnchors([10.0,13.0,16.0,30.0,33.0,23.0,30.0,61.0,62.0,45.0,59.0,119.0,116.0,90.0,156.0,198.0,373.0,326.0])
+spatialDetectionNetwork.setAnchorMasks({"side80": [0,1,2], "side40": [3,4,5], "side20": [6,7,8]})
 spatialDetectionNetwork.setIouThreshold(0.5)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
 
@@ -143,8 +107,6 @@ spatialDetectionNetwork.outNetwork.link(nnNetworkOut.input)
 
 # Connect to device and start pipeline
 device =dai.Device(pipeline)
-
-################################################
 
 # Output queues will be used to get the rgb frames and nn data from the outputs defined above
 previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
@@ -179,12 +141,12 @@ while True:
     depth = depthQueue.get()
     inNN = networkQueue.get()
 
-    #if printOutputLayersOnce:
-    #    toPrint = 'Output layer names:'
-    #    for ten in inNN.getAllLayerNames():
-    #        toPrint = f'{toPrint} {ten},'
-    #    print(toPrint)
-    #    printOutputLayersOnce = False;
+    if printOutputLayersOnce:
+        toPrint = 'Output layer names:'
+        for ten in inNN.getAllLayerNames():
+            toPrint = f'{toPrint} {ten},'
+        print(toPrint)
+        printOutputLayersOnce = False;
 
     frame = inPreview.getCvFrame()
     depthFrame = depth.getFrame() # depthFrame values are in millimeters
@@ -233,39 +195,12 @@ while True:
             label = detection.label
         cv2.putText(frame, str(label), (x1 + 10, y1 + 20), FontFace, 0.5, 255)
         cv2.putText(frame, "{:.2f}".format(detection.confidence*100), (x1 + 10, y1 + 35), FontFace, 0.5, 255)
-        cv2.putText(frame, f"X: {int(detection.spatialCoordinates.x)} mm", (x1 + 10, y1 + 50), FontFace, 0.5, 255)
-        cv2.putText(frame, f"Y: {int(detection.spatialCoordinates.y)} mm", (x1 + 10, y1 + 65), FontFace, 0.5, 255)
         cv2.putText(frame, f"Z: {int(detection.spatialCoordinates.z)} mm", (x1 + 10, y1 + 80), FontFace, 0.5, 255)
-
         cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, FontFace)
 
     cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.4, TextColor)
     cv2.imshow("depth", depthFrameColor)
     cv2.imshow("rgb", frame)
-
-    # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
-    if cv2.waitKey(1) in [27, 32, ord('q')]:
-        break
-
-################################################
-device = dai.Device(pm.pipeline)
-pv.createQueues(device)
-nm.createQueues(device)
-nnData = []
-
-while True:
-
-    # parse outputs
-    pv.prepareFrames()
-    inNn = nm.outputQueue.tryGet()
-
-    if inNn is not None:
-        nnData = nm.decode(inNn)
-        # count FPS
-        fpsHandler.tick("color")
-
-    nm.draw(pv, nnData)
-    pv.showFrames()
 
     # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
     if cv2.waitKey(1) in [27, 32, ord('q')]:
