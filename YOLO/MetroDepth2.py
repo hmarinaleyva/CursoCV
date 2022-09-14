@@ -197,6 +197,7 @@ while True:
         cv2.putText(frame, "{:.2f}".format(detection.confidence*100), (x1 + 10, y1 + 35), FontFace, 0.5, 255)
         cv2.putText(frame, f"Z: {int(detection.spatialCoordinates.z)} mm", (x1 + 10, y1 + 80), FontFace, 0.5, 255)
         cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, FontFace)
+        cv2.line(frame, (x0, y0), (x1, y2), LineColor, 2)
 
     cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.4, TextColor)
     cv2.imshow("depth", depthFrameColor)
