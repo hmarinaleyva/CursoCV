@@ -1,3 +1,23 @@
+"""
+PipelineManager:
+    Clase de administrador que maneja diferentes operaciones (depthai.Pipeline)
+    La mayoría de las funciones concluyen la creación de nodos y lógica de conexión
+    en un conjunto de funciones de conveniencia.
+
+PreviewManager:
+    Clase de administrador que maneja marcos y los muestra correctamente.
+
+BlobManager:
+    Clase de administrador que maneja los blobs de MyriadX.
+
+NNetManager:
+    Clase de administrador que maneja todas las funcionalidades relacionadas con NN.
+    Es capaz de crear nodos y conexiones apropiados, decodificación de la salida de la 
+    red neuronal automáticamente o mediante el uso de un archivo de controlador externo.
+
+"""
+
+
 from depthai_sdk import Previews, FPSHandler
 from depthai_sdk.managers import PipelineManager, PreviewManager, BlobManager, NNetManager
 import depthai as dai
@@ -9,7 +29,11 @@ os.chdir(MainDir)
 
 # Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
 MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
-CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json") # Path to model config file (.json)
+CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
+
+MODEL_PATH  = os.path.join(MainDir, '../Models/yolov5s/', "yolov5s_openvino_2021.4_6shave.blob")
+CONFIG_PATH = os.path.join(MainDir, '../Models/yolov5s/', "yolov5s.json")
+
 
 # initialize blob manager with path to the blob
 bm = BlobManager(blobPath=MODEL_PATH)
@@ -30,28 +54,27 @@ nn = nm.createNN(pipeline=pm.pipeline, nodes=pm.nodes, source=Previews.color.nam
 pm.addNn(nn)
 
 # initialize pipeline
-device = dai.Device(pm.pipeline)
-# create outputs
-pv.createQueues(device)
-nm.createQueues(device)
+with dai.Device(pm.pipeline) as device:
+    # create outputs
+    pv.createQueues(device)
+    nm.createQueues(device)
 
-nnData = []
-while True:
+    nnData = []
 
-    # parse outputs
-    pv.prepareFrames()
-    inNn = nm.outputQueue.tryGet()
+    while True:
 
-    if inNn is not None:
-        nnData = nm.decode(inNn)
-        # count FPS
-        fpsHandler.tick("color")
+        # parse outputs
+        pv.prepareFrames()
+        inNn = nm.outputQueue.tryGet()
 
-    nm.draw(pv, nnData)
-    pv.showFrames()
+        if inNn is not None:
+            nnData = nm.decode(inNn)
+            # count FPS
+            fpsHandler.tick("color")
 
-    # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
-    if cv2.waitKey(1) in [27, 32, ord('q')]:
-        break
+        nm.draw(pv, nnData)
+        pv.showFrames()
 
-device.close()
+        # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
+        if cv2.waitKey(1) in [27, 32, ord('q')]:
+            break

@@ -174,17 +174,17 @@ fps = 0
 printOutputLayersOnce = True
 
 while True:
-    inPreview = previewQueue.get()
+    inPreview = previewQueue.tryGet()
     inDet = detectionNNQueue.get()
     depth = depthQueue.get()
-    inNN = networkQueue.get()
+    inNN = networkQueue.tryGet()
 
-    if printOutputLayersOnce:
-        toPrint = 'Output layer names:'
-        for ten in inNN.getAllLayerNames():
-            toPrint = f'{toPrint} {ten},'
-        print(toPrint)
-        printOutputLayersOnce = False;
+    #if printOutputLayersOnce:
+    #    toPrint = 'Output layer names:'
+    #    for ten in inNN.getAllLayerNames():
+    #        toPrint = f'{toPrint} {ten},'
+    #    print(toPrint)
+    #    printOutputLayersOnce = False;
 
     frame = inPreview.getCvFrame()
     depthFrame = depth.getFrame() # depthFrame values are in millimeters
