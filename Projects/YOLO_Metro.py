@@ -11,10 +11,6 @@ os.chdir(MainDir)
 MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
 CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
 
-MODEL_PATH  = os.path.join(MainDir, '../Models/yolov5s/', "yolov5s_openvino_2021.4_6shave.blob")
-CONFIG_PATH = os.path.join(MainDir, '../Models/yolov5s/', "yolov5s.json")
-
-
 # initialize blob manager with path to the blob
 bm = BlobManager(blobPath=MODEL_PATH)
 
@@ -34,27 +30,26 @@ nn = nm.createNN(pipeline=pm.pipeline, nodes=pm.nodes, source=Previews.color.nam
 pm.addNn(nn)
 
 # initialize pipeline
-with dai.Device(pm.pipeline) as device:
-    # create outputs
-    pv.createQueues(device)
-    nm.createQueues(device)
+device = dai.Device(pm.pipeline)
+# create outputs
+pv.createQueues(device)
+nm.createQueues(device)
 
-    nnData = []
+nnData = []
+while True:
 
-    while True:
+    # parse outputs
+    pv.prepareFrames()
+    inNn = nm.outputQueue.tryGet()
 
-        # parse outputs
-        pv.prepareFrames()
-        inNn = nm.outputQueue.tryGet()
+    if inNn is not None:
+        nnData = nm.decode(inNn)
+        # count FPS
+        fpsHandler.tick("color")
 
-        if inNn is not None:
-            nnData = nm.decode(inNn)
-            # count FPS
-            fpsHandler.tick("color")
+    nm.draw(pv, nnData)
+    pv.showFrames()
 
-        nm.draw(pv, nnData)
-        pv.showFrames()
-
-        # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
-        if cv2.waitKey(1) in [27, 32, ord('q')]:
-            break
+    # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
+    if cv2.waitKey(1) in [27, 32, ord('q')]:
+        break

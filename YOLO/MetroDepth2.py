@@ -57,6 +57,20 @@ labelMap = [
     "teddy bear",     "hair drier", "toothbrush"
 ]
 
+labelMap = [
+            "down",
+            "emergency",
+            "emergency-forward",
+            "emergency-left",
+            "emergency-right",
+            "forward",
+            "handicapped",
+            "left",
+            "line one",
+            "line-three",
+            "right"
+        ]
+
 # Create pipeline
 pipeline = dai.Pipeline()
 
