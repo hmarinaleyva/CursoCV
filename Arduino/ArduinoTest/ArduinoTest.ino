@@ -35,16 +35,37 @@ void CMajor7_Arpeggio() {
     tone(PIN_BUZZER, NOTE_B4, DURATION);
 }
 
-void Octave_Ascendant() {
-    tone(PIN_BUZZER, NOTE_C4, DURATION);
+
+void D7_Arpeggio() {
+    tone(PIN_BUZZER, NOTE_D4, DURATION);
     delay(DURATION);
-    tone(PIN_BUZZER, NOTE_C5, DURATION);
+    tone(PIN_BUZZER, NOTE_F4, DURATION);
+    delay(DURATION);
+    tone(PIN_BUZZER, NOTE_A4, DURATION);
+    delay(DURATION);
+    tone(PIN_BUZZER, NOTE_C4, DURATION);
+}
+
+void E7_Arpeggio() {
+    tone(PIN_BUZZER, NOTE_E4, DURATION);
+    delay(DURATION);
+    tone(PIN_BUZZER, NOTE_G4, DURATION);
+    delay(DURATION);
+    tone(PIN_BUZZER, NOTE_B4, DURATION);
+    delay(DURATION);
+    tone(PIN_BUZZER, NOTE_D4, DURATION);
+}
+
+void Octave_Ascendant() {
+    tone(PIN_BUZZER, NOTE_C3, DURATION);
+    delay(DURATION);
+    tone(PIN_BUZZER, NOTE_E3, DURATION);
 }
 
 void Octave_Decendent() {
-    tone(PIN_BUZZER, NOTE_C4, DURATION);
+    tone(PIN_BUZZER, NOTE_B3, DURATION);
     delay(DURATION);
-    tone(PIN_BUZZER, NOTE_C5, DURATION);
+    tone(PIN_BUZZER, NOTE_G3, DURATION);
 }
 
 void setup() {
@@ -69,10 +90,10 @@ void loop() {
         }
         
         if (dato == 49){ // Si el dato enviado es 1 (49 codificado en ASCII) 
-            Octave_Ascendant();
+            D7_Arpeggio();
         }
         if (dato == 50){ // Si el dato enviado es 2 (50 codificado en ASCII)
-            Octave_Decendent();
+            E7_Arpeggio();
         }
 
         // Interfaz de control háptico
