@@ -197,14 +197,14 @@ while True:
             cv2.putText(frame, detection_label , (x1, y1), FontFace, FontSize, TextColor, 2)
             cv2.putText(frame, "{:.2f} %".format(confidence), (x2, y), FontFace, FontSize, TextColor, 1)
             cv2.putText(frame, "Z: {:.3f} mm".format(z) , (x1, y+h), FontFace, FontSize, TextColor)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, BoxesSize)
 
 
-        # Calcular el objeto detectado más cercano al centro de la imagen
+        # Calcular el objeto detectado más cercano al centro de la imágen
         x, y = Nearest_Coordinate((x0,y0), Centroids)
 
-        # draw bounding box an line
-        cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, BoxesSize)
-        cv2.line(frame, (x0, y0), (x, y), LineColor, 2)
+        # Dibujar una checha que indique el objeto más cercano desde centro de la imágen
+        cv2.arrowedLine(frame, (x0, y0), (x, y), LineColor, 2)
         
 
     cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.4, TextColor)
