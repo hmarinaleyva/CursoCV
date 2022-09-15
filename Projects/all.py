@@ -11,172 +11,192 @@ except:
 
 ArduinoSerial.write(b'0123456') #enviar una cadena de bytes
 
-from utilities import *
 from depthai_sdk import Previews, FPSHandler
 from depthai_sdk.managers import PipelineManager, PreviewManager, BlobManager, NNetManager
 import depthai as dai
-import cv2, os
+import cv2, os, time
 
-#Cambiar la ruta de ejecución aquí
+# Cambiar la ruta de ejecución aquí
 MainDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(MainDir)
 
-#Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
+# Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
 MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
 CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
 
-MODEL_PATH  = os.path.join(MainDir, '../Models/yolov5s/', "yolov5s_openvino_2021.4_6shave.blob")
-CONFIG_PATH = os.path.join(MainDir, '../Models/yolov5s/', "yolov5s.json")
+# Anhcho y alto de la imagen de entrada a la red neuronal
+width, height = 640, 480
 
-############################################### ############################################## #################
-#Crear canalización
+# Ruta absoluta del modelo
+nnBlobPath = MODEL_PATH
+
+labelMap = [
+            "down",
+            "emergency",
+            "emergency-forward",
+            "emergency-left",
+            "emergency-right",
+            "forward",
+            "handicapped",
+            "left",
+            "line one",
+            "line-three",
+            "right"
+        ]
+
+# Create pipeline
 pipeline = dai.Pipeline()
 
-#Definir fuentes y salidas
+# Define sources and outputs
+camRgb = pipeline.create(dai.node.ColorCamera)
+spatialDetectionNetwork = pipeline.create(dai.node.YoloSpatialDetectionNetwork)
+
+# Define sources and outputs for the spatial detection network
 monoLeft = pipeline.create(dai.node.MonoCamera)
 monoRight = pipeline.create(dai.node.MonoCamera)
 stereo = pipeline.create(dai.node.StereoDepth)
 
-#Propiedades
+nnNetworkOut = pipeline.create(dai.node.XLinkOut)
+
+xoutRgb = pipeline.create(dai.node.XLinkOut)
+xoutNN = pipeline.create(dai.node.XLinkOut)
+xoutBoundingBoxDepthMapping = pipeline.create(dai.node.XLinkOut)
+xoutDepth = pipeline.create(dai.node.XLinkOut)
+
+xoutRgb.setStreamName("rgb")
+xoutNN.setStreamName("detections")
+xoutBoundingBoxDepthMapping.setStreamName("boundingBoxDepthMapping")
+xoutDepth.setStreamName("depth")
+nnNetworkOut.setStreamName("nnNetwork")
+
+# Properties
+camRgb.setPreviewSize(width, height)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+camRgb.setInterleaved(False)
+camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
-stereo.initialConfig.setConfidenceThreshold(255)
-stereo.setLeftRightCheck(True)
-stereo.setSubpixel(False)
+# setting node configs
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 
-#Enlace
+# Align depth map to the perspective of RGB camera, on which inference is done
+stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
+stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
+
+spatialDetectionNetwork.setBlobPath(nnBlobPath)
+spatialDetectionNetwork.setConfidenceThreshold(0.5)
+spatialDetectionNetwork.input.setBlocking(False)
+spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
+spatialDetectionNetwork.setDepthLowerThreshold(100)
+spatialDetectionNetwork.setDepthUpperThreshold(5000)
+
+# Yolo specific parameters
+spatialDetectionNetwork.setNumClasses(11)
+spatialDetectionNetwork.setCoordinateSize(4)
+spatialDetectionNetwork.setAnchors([10.0,13.0,16.0,30.0,33.0,23.0,30.0,61.0,62.0,45.0,59.0,119.0,116.0,90.0,156.0,198.0,373.0,326.0])
+spatialDetectionNetwork.setAnchorMasks({"side80": [0,1,2], "side40": [3,4,5], "side20": [6,7,8]})
+spatialDetectionNetwork.setIouThreshold(0.5)
+spatialDetectionNetwork.setConfidenceThreshold(0.5)
+
+# Linking
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 
-xoutDepth = pipeline.create(dai.node.XLinkOut)
-xoutDepth.setStreamName("depth")
-stereo.depth.link(xoutDepth.input)
+camRgb.preview.link(spatialDetectionNetwork.input)
+spatialDetectionNetwork.passthrough.link(xoutRgb.input)
 
-xoutDepth = pipeline.create(dai.node.XLinkOut)
-xoutDepth.setStreamName("disp")
-stereo.disparity.link(xoutDepth.input)
+spatialDetectionNetwork.out.link(xoutNN.input)
+spatialDetectionNetwork.boundingBoxMapping.link(xoutBoundingBoxDepthMapping.input)
 
-############################################### ############################################## #################
-#inicializar el administrador de blobs con la ruta al blob
-bm = BlobManager(blobPath=MODEL_PATH)
+stereo.depth.link(spatialDetectionNetwork.inputDepth)
+spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
+spatialDetectionNetwork.outNetwork.link(nnNetworkOut.input)
 
-nm = NNetManager(nnFamily="YOLO", inputSize=4)
-nm.readConfig(CONFIG_PATH)  #esto también analizará el tamaño de entrada correcto
+# Connect to device and start pipeline
+device =dai.Device(pipeline)
 
-pm = PipelineManager()
-pm.createColorCam(previewSize=nm.inputSize, xout=True)
+# Output queues will be used to get the rgb frames and nn data from the outputs defined above
+previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
+detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
+xoutBoundingBoxDepthMappingQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
+depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
+networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False);
 
-#crear administrador de vista previa
-fpsHandler = FPSHandler()
-pv = PreviewManager(display=[Previews.color.name], fpsHandler=fpsHandler)
+# Coordenadas del centro de la imagen
+x0 = width//2
+y0 = height//2
 
-#crear profundidadai.node.NeuralNetwork
-YoloNN = nm.createNN(pipeline=pm.pipeline, nodes=pm.nodes, source=Previews.color.name,
-                 blobPath=bm.getBlob(shaves=6, openvinoVersion=pm.pipeline.getOpenVINOVersion(), zooType="depthai"))
+# Estilos de dibujo (colores y timpografía)
+BoxesColor = (0, 255, 0)
+BoxesSize = 1
+LineColor = (0, 0, 255)
+CircleColor = (255, 0, 0)
+TextColor = (0, 255, 255)
+FontFace = cv2.FONT_HERSHEY_SIMPLEX # Fuente de texto
+FontSize = 0.5 # Tamaño de la fuente
 
-pm.addNn(YoloNN)
+# Variables de tiempo y velocidad 
+fps = 0
+time = 0
 
-pipeline.createYoloDetectionNetwork()
-
-
-## inicializar tubería
-#con dai.Device(tubería) como dispositivo:
-## crear salidas
-#pv.createQueues(dispositivo)
-#nm.createQueues(dispositivo)
-#
-#nnDatos = []
-#
-#mientras que es cierto:
-#
-## analizar salidas
-#pv.prepareFrames()
-#inNn = nm.outputQueue.tryGet()
-#
-#si inNn no es Ninguno:
-#nnData = nm.decode(inNn)
-## cuenta FPS
-#controlador de fps.tick("color")
-#
-#nm.draw(pv, nnData)
-#pv.showFrames()
-#
-## Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q}
-#si cv2.waitKey(1) en [27, 32, ord('q')]:
-#descanso
-############################################### ############################################## #####
-#Conéctese al dispositivo e inicie la canalización
-device = dai.Device(pipeline)
-
-#La cola de salida se utilizará para obtener los marcos de profundidad de las salidas definidas anteriormente
-depthQueue = device.getOutputQueue(name="depth")
-dispQ = device.getOutputQueue(name="disp")
-
-text = TextHelper()
-hostSpatials = HostSpatialsCalc(device)
-y = 200
-x = 300
-step = 3
-delta = 5
-hostSpatials.setDeltaRoi(delta)
-
-time_start = time.time()
 while True:
+
+
+    frame = previewQueue.get().getCvFrame()
+    detections = detectionNNQueue.get().detections
+
     depthFrame = depthQueue.get().getFrame()
-    #Calcular coordenadas espaciales desde el marco de profundidad
-    spatials, centroid = hostSpatials.calc_spatials(depthFrame, (x,y)) #centroide == x/y en nuestro caso
-#Obtenga un marco de disparidad para una mejor visualización de la profundidad
-    disp = dispQ.get().getFrame()
-    disp = cv2.applyColorMap(disp, cv2.COLORMAP_JET)
+    depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
+    depthFrameColor = cv2.equalizeHist(depthFrameColor)
+    depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
-    text.rectangle(disp, (x-delta, y-delta), (x+delta, y+delta))
-    text.putText(disp, "X: " + ("{:.2f}m".format(spatials['x']/1000) if not math.isnan(spatials['x']) else "--"), (x + 10, y + 20))
-    text.putText(disp, "Y: " + ("{:.2f}m".format(spatials['y']/1000) if not math.isnan(spatials['y']) else "--"), (x + 10, y + 35))
-    text.putText(disp, "Z: " + ("{:.2f}m".format(spatials['z']/1000) if not math.isnan(spatials['z']) else "--"), (x + 10, y + 50))
 
-    z = spatials['z']/1000
+    if len(detections) != 0:
+        boundingBoxMapping = xoutBoundingBoxDepthMappingQueue.get()
+        roiDatas = boundingBoxMapping.getConfigData()
 
-    print(z)
+        for detection in detections: 
+            # Calcular los vertices de la caja delimitadora
+            x1 = int(detection.xmin * width)
+            x2 = int(detection.xmax * width)
+            y1 = int(detection.ymin * height)
+            y2 = int(detection.ymax * height)
+            
+            # Calcular el centro de la caja delimitadora
+            x = (x1 + x2) // 2
+            y = (y1 + y2) // 2
 
-    
-    if time.time() - time_start >= z/4 and z>0 and z<1:
-        ArduinoSerial.write(b'3')
-        time_start = time.time()
+            # Calcular el ancho y alto de la caja delimitadora
+            w = x2 - x1
+            h = y2 - y1
 
-    if time.time() - time_start >= z/8 and z>1 and z<2:
-        ArduinoSerial.write(b'2')
-        time_start = time.time()
+            # Calcular la distancia a la caja delimitadora
+            z = detection.spatialCoordinates.z/1000
+            confidence = detection.confidence*100
 
-    if time.time() - time_start >= z/16 and z>2 and z<3:
-        ArduinoSerial.write(b'1')
-        time_start = time.time()
+            try:
+                label = labelMap[detection.label]
+            except:
+                label = detection.label
 
-    if time.time() - time_start >= z/32 and z>3 and z<4:
-        ArduinoSerial.write(b'0')
-        time_start = time.time()
+            # drwawing info
+            cv2.putText(frame, str(label) , (x1, y1), FontFace, FontSize, TextColor, 2)
+            
+            
+            cv2.putText(frame, "{:.2f} %".format(confidence), (x2, y), FontFace, FontSize, TextColor, 1)
+            cv2.putText(frame, "Z: {:.3f} mm".format(z) , (x1, y+h), FontFace, FontSize, TextColor)
 
-    #mostrar el marco
-    cv2.imshow("depth", disp)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, BoxesSize)
+            cv2.line(frame, (x0, y0), (x, y), LineColor, 2)
 
-    key = cv2.waitKey(1)
-    if key in [27, 32, ord('q')]: #Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q}
+    cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.4, TextColor)
+    cv2.imshow("depth", depthFrameColor)
+    cv2.imshow("rgb", frame)
+
+    # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
+    if cv2.waitKey(1) in [27, 32, ord('q')]:
         break
-    elif key == ord('w'):
-        y -= step
-    elif key == ord('a'):
-        x -= step
-    elif key == ord('s'):
-        y += step
-    elif key == ord('d'):
-        x += step
-    elif key == ord('r'): #Aumentar delta
-        if delta < 50:
-            delta += 1
-            hostSpatials.setDeltaRoi(delta)
-    elif key == ord('f'): #Disminuir delta
-        if 3 < delta:
-            delta -= 1
-            hostSpatials.setDeltaRoi(delta)

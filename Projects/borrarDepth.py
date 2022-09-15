@@ -1,3 +1,5 @@
+
+from utilities import *
 from depthai_sdk import Previews, FPSHandler
 from depthai_sdk.managers import PipelineManager, PreviewManager, BlobManager, NNetManager
 import depthai as dai
@@ -52,11 +54,11 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # Setting node configs
 stereo.initialConfig.setConfidenceThreshold(255)
-stereo.setLeftRightCheck(True)
+stereo.setLeftRightCheck(False)
 stereo.setSubpixel(False)
-stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
-
-# Align depth map to the perspective of RGB camera, on which inference is done
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
+#
+## Align depth map to the perspective of RGB camera, on which inference is done
 stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
 stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
 
@@ -68,9 +70,9 @@ xoutDepth = pipeline.create(dai.node.XLinkOut)
 xoutDepth.setStreamName("depth")
 stereo.depth.link(xoutDepth.input)
 
-xoutDepth = pipeline.create(dai.node.XLinkOut)
-xoutDepth.setStreamName("disp")
-stereo.disparity.link(xoutDepth.input)
+#xoutDepth = pipeline.create(dai.node.XLinkOut)
+#xoutDepth.setStreamName("disp")
+#stereo.disparity.link(xoutDepth.input)
 
 ####################################
 #### YOLO MODEL AND RGB CAMERA #####
@@ -96,9 +98,6 @@ xoutNN.setStreamName("detections")
 xoutBoundingBoxDepthMapping = pipeline.create(dai.node.XLinkOut)
 xoutBoundingBoxDepthMapping.setStreamName("boundingBoxDepthMapping")
 
-
-
-
 spatialDetectionNetwork.setBlobPath(nnBlobPath)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
 spatialDetectionNetwork.input.setBlocking(False)
@@ -115,17 +114,14 @@ spatialDetectionNetwork.setIouThreshold(0.5)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
 
 # Linking
-
-
 camRgb.preview.link(spatialDetectionNetwork.input)
 spatialDetectionNetwork.passthrough.link(xoutRgb.input)
 
 spatialDetectionNetwork.out.link(xoutNN.input)
 spatialDetectionNetwork.boundingBoxMapping.link(xoutBoundingBoxDepthMapping.input)
 
-stereo.depth.link(spatialDetectionNetwork.inputDepth)
+stereo.disparity.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
-
 
 # Connect to device and start pipeline
 device =dai.Device(pipeline)
@@ -135,48 +131,45 @@ previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
 detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
 xoutBoundingBoxDepthMappingQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
 depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
+dispQ = device.getOutputQueue(name="depth")
 
 # Coordenadas del centro de la imagen
 x0 = width//2
 y0 = height//2
 
-# Estilos de dibujo
+# Estilos de dibujo (colores y timpografía)
 BoxesColor = (0, 255, 0)
 LineColor = (0, 0, 255)
 CircleColor = (255, 0, 0)
 TextColor = (255,255,255)
 FontFace = cv2.FONT_HERSHEY_SIMPLEX # Fuente de texto
+FontSize = 0.5 # Tamaño de la fuente
 
 # Variables de tiempo y velocidad 
 fps = 0
 start_frame_time = 0
 
-startTime = time.monotonic()
-counter = 0
-fps = 0
-printOutputLayersOnce = True
-
 while True:
-    inPreview = previewQueue.get()
-    inDet = detectionNNQueue.get()
-    depth = depthQueue.get()
 
 
-    frame = inPreview.getCvFrame()
-    depthFrame = depth.getFrame()
+    frame = previewQueue.get().getCvFrame()
+    depthFrame = depthQueue.get().getFrame()
+    detections = detectionNNQueue.get().detections
+
+
+
     depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
     depthFrameColor = cv2.equalizeHist(depthFrameColor)
     depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
 
-    counter+=1
+
     current_time = time.monotonic()
     if (current_time - startTime) > 0.01 : # every 10 ms
         fps = counter / (current_time - startTime)
         counter = 0
         startTime = current_time
 
-    detections = inDet.detections
     if len(detections) != 0:
         boundingBoxMapping = xoutBoundingBoxDepthMappingQueue.get()
         roiDatas = boundingBoxMapping.getConfigData()
@@ -216,3 +209,51 @@ while True:
     # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
     if cv2.waitKey(1) in [27, 32, ord('q')]:
         break
+
+#text = TextHelper()
+#hostSpatials = HostSpatialsCalc(device)
+#y = 200
+#x = 300
+#step = 3
+#delta = 5
+#hostSpatials.setDeltaRoi(delta)
+#
+#time_start = time.time()
+#while True:
+#    depthFrame = depthQueue.get().getFrame()
+#    # Calculate spatial coordiantes from depth frame
+#    spatials, centroid = hostSpatials.calc_spatials(depthFrame, (x,y)) # centroid == x/y in our case
+#
+#    # Get disparity frame for nicer depth visualization
+#    disp = dispQ.get().getFrame()
+#    #disp = cv2.applyColorMap(disp, cv2.COLORMAP_JET)
+#
+#    text.rectangle(disp, (x-delta, y-delta), (x+delta, y+delta))
+#    text.putText(disp, "X: " + ("{:.2f}m".format(spatials['x']/1000) if not math.isnan(spatials['x']) else "--"), (x + 10, y + 20))
+#    text.putText(disp, "Y: " + ("{:.2f}m".format(spatials['y']/1000) if not math.isnan(spatials['y']) else "--"), (x + 10, y + 35))
+#    text.putText(disp, "Z: " + ("{:.2f}m".format(spatials['z']/1000) if not math.isnan(spatials['z']) else "--"), (x + 10, y + 50))
+#
+#
+#    # Show the frame
+#    cv2.imshow("depth", disp)
+#
+#    key = cv2.waitKey(1)
+#    if key in [27, 32, ord('q')]: # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q}
+#        break
+#    elif key == ord('w'):
+#        y -= step
+#    elif key == ord('a'):
+#        x -= step
+#    elif key == ord('s'):
+#        y += step
+#    elif key == ord('d'):
+#        x += step
+#    elif key == ord('r'): # Increase Delta
+#        if delta < 50:
+#            delta += 1
+#            hostSpatials.setDeltaRoi(delta)
+#    elif key == ord('f'): # Decrease Delta
+#        if 3 < delta:
+#            delta -= 1
+#            hostSpatials.setDeltaRoi(delta)
+#
