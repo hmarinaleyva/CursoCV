@@ -50,10 +50,15 @@ monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
-# Setings
+# Setting node configs
 stereo.initialConfig.setConfidenceThreshold(255)
 stereo.setLeftRightCheck(True)
 stereo.setSubpixel(False)
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+
+# Align depth map to the perspective of RGB camera, on which inference is done
+stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
+stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
 
 # Linking
 monoLeft.out.link(stereo.left)
@@ -67,9 +72,9 @@ xoutDepth = pipeline.create(dai.node.XLinkOut)
 xoutDepth.setStreamName("disp")
 stereo.disparity.link(xoutDepth.input)
 
-##################################
-#### YOLO MODEL (RGB CAMERA) #####
-##################################
+####################################
+#### YOLO MODEL AND RGB CAMERA #####
+####################################
 
 # Define sources and outputs
 camRgb = pipeline.create(dai.node.ColorCamera)
@@ -92,12 +97,7 @@ xoutBoundingBoxDepthMapping = pipeline.create(dai.node.XLinkOut)
 xoutBoundingBoxDepthMapping.setStreamName("boundingBoxDepthMapping")
 
 
-# setting node configs
-#stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 
-# Align depth map to the perspective of RGB camera, on which inference is done
-#stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
-#stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
 
 spatialDetectionNetwork.setBlobPath(nnBlobPath)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
