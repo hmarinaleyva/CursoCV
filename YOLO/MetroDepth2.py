@@ -12,33 +12,6 @@ os.chdir(MainDir)
 MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
 CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
 
-#######################################################################################################################
-
-
-# initialize blob manager with path to the blob
-bm = BlobManager(blobPath=MODEL_PATH)
-
-nm = NNetManager(nnFamily="YOLO", inputSize=4)
-nm.readConfig(CONFIG_PATH)  # this will also parse the correct input size
-
-pm = PipelineManager()
-pm.createColorCam(previewSize=nm.inputSize, xout=True)
-
-# create preview manager
-fpsHandler = FPSHandler()
-pv = PreviewManager(display=[Previews.color.name], fpsHandler=fpsHandler)
-
-# create depthai.node.NeuralNetwork
-YoloNN = nm.createNN(pipeline=pm.pipeline, nodes=pm.nodes, source=Previews.color.name,
-                 blobPath=bm.getBlob(shaves=6, openvinoVersion=pm.pipeline.getOpenVINOVersion(), zooType="depthai"))
-
-#pm.addNn(YoloNN)
-pm.addNn(YoloNN)
-
-
-######################################################################################################################
-
-
 # Anhcho y alto de la imagen de entrada a la red neuronal
 width, height = 640, 480
 
@@ -71,8 +44,6 @@ monoLeft = pipeline.create(dai.node.MonoCamera)
 monoRight = pipeline.create(dai.node.MonoCamera)
 stereo = pipeline.create(dai.node.StereoDepth)
 
-nnNetworkOut = pipeline.create(dai.node.XLinkOut)
-
 xoutRgb = pipeline.create(dai.node.XLinkOut)
 xoutNN = pipeline.create(dai.node.XLinkOut)
 xoutBoundingBoxDepthMapping = pipeline.create(dai.node.XLinkOut)
@@ -82,7 +53,6 @@ xoutRgb.setStreamName("rgb")
 xoutNN.setStreamName("detections")
 xoutBoundingBoxDepthMapping.setStreamName("boundingBoxDepthMapping")
 xoutDepth.setStreamName("depth")
-nnNetworkOut.setStreamName("nnNetwork")
 
 # Properties
 camRgb.setPreviewSize(width, height)
@@ -129,7 +99,7 @@ spatialDetectionNetwork.boundingBoxMapping.link(xoutBoundingBoxDepthMapping.inpu
 
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
-spatialDetectionNetwork.outNetwork.link(nnNetworkOut.input)
+
 
 # Connect to device and start pipeline
 device =dai.Device(pipeline)
@@ -139,7 +109,6 @@ previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
 detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
 xoutBoundingBoxDepthMappingQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
 depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
-networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False);
 
 # Coordenadas del centro de la imagen
 x0 = width//2
@@ -165,14 +134,14 @@ while True:
     inPreview = previewQueue.get()
     inDet = detectionNNQueue.get()
     depth = depthQueue.get()
-    inNN = networkQueue.get()
+
 
     frame = inPreview.getCvFrame()
-    depthFrame = depth.getFrame() # depthFrame values are in millimeters
+    depthFrame = depth.getFrame()
+    depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
+    depthFrameColor = cv2.equalizeHist(depthFrameColor)
+    depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
-    #depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-    #depthFrameColor = cv2.equalizeHist(depthFrameColor)
-    #depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_JET)
 
     counter+=1
     current_time = time.monotonic()
@@ -215,7 +184,7 @@ while True:
         cv2.line(frame, (x0, y0), (x1, y2), LineColor, 2)
 
     cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.4, TextColor)
-    cv2.imshow("depth", depthFrame)
+    cv2.imshow("depth", depthFrameColor)
     cv2.imshow("rgb", frame)
 
     # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 

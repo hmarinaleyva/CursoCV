@@ -10,6 +10,7 @@ os.chdir(MainDir)
 
 # Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
 MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
+CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
 
 # Anhcho y alto de la imagen de entrada a la red neuronal
 width, height = 640, 480
@@ -17,7 +18,8 @@ width, height = 640, 480
 # Ruta absoluta del modelo
 nnBlobPath = MODEL_PATH
 
-labelMap = ["down",
+labelMap = [
+            "down",
             "emergency",
             "emergency-forward",
             "emergency-left",
@@ -33,26 +35,27 @@ labelMap = ["down",
 # Create pipeline
 pipeline = dai.Pipeline()
 
-# Define sources and outputs
-camRgb = pipeline.create(dai.node.ColorCamera)
-spatialDetectionNetwork = pipeline.create(dai.node.YoloSpatialDetectionNetwork)
+###############################
+#### STEREOSCOPIC VISION  #####
+###############################
 
-# Define sources and outputs for Stereo Depth (SD)
+# Define sources and outputs
 monoLeft = pipeline.create(dai.node.MonoCamera)
 monoRight = pipeline.create(dai.node.MonoCamera)
 stereo = pipeline.create(dai.node.StereoDepth)
 
-# Properties for SD
+# Properties
 monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
 monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
+# Setings
 stereo.initialConfig.setConfidenceThreshold(255)
 stereo.setLeftRightCheck(True)
 stereo.setSubpixel(False)
 
-# Linking for SD
+# Linking
 monoLeft.out.link(stereo.left)
 monoRight.out.link(stereo.right)
 
@@ -64,20 +67,13 @@ xoutDepth = pipeline.create(dai.node.XLinkOut)
 xoutDepth.setStreamName("disp")
 stereo.disparity.link(xoutDepth.input)
 
+##################################
+#### YOLO MODEL (RGB CAMERA) #####
+##################################
 
-
-nnNetworkOut = pipeline.create(dai.node.XLinkOut)
-
-xoutRgb = pipeline.create(dai.node.XLinkOut)
-xoutNN = pipeline.create(dai.node.XLinkOut)
-xoutBoundingBoxDepthMapping = pipeline.create(dai.node.XLinkOut)
-xoutDepth = pipeline.create(dai.node.XLinkOut)
-
-xoutRgb.setStreamName("rgb")
-xoutNN.setStreamName("detections")
-xoutBoundingBoxDepthMapping.setStreamName("boundingBoxDepthMapping")
-xoutDepth.setStreamName("depth")
-nnNetworkOut.setStreamName("nnNetwork")
+# Define sources and outputs
+camRgb = pipeline.create(dai.node.ColorCamera)
+spatialDetectionNetwork = pipeline.create(dai.node.YoloSpatialDetectionNetwork)
 
 # Properties
 camRgb.setPreviewSize(width, height)
@@ -85,13 +81,23 @@ camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 
+# Linking 
+xoutRgb = pipeline.create(dai.node.XLinkOut)
+xoutRgb.setStreamName("rgb")
+
+xoutNN = pipeline.create(dai.node.XLinkOut)
+xoutNN.setStreamName("detections")
+
+xoutBoundingBoxDepthMapping = pipeline.create(dai.node.XLinkOut)
+xoutBoundingBoxDepthMapping.setStreamName("boundingBoxDepthMapping")
+
 
 # setting node configs
-stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+#stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 
 # Align depth map to the perspective of RGB camera, on which inference is done
-stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
-stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
+#stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
+#stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
 
 spatialDetectionNetwork.setBlobPath(nnBlobPath)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
@@ -109,8 +115,7 @@ spatialDetectionNetwork.setIouThreshold(0.5)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
 
 # Linking
-monoLeft.out.link(stereo.left)
-monoRight.out.link(stereo.right)
+
 
 camRgb.preview.link(spatialDetectionNetwork.input)
 spatialDetectionNetwork.passthrough.link(xoutRgb.input)
@@ -120,7 +125,7 @@ spatialDetectionNetwork.boundingBoxMapping.link(xoutBoundingBoxDepthMapping.inpu
 
 stereo.depth.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
-spatialDetectionNetwork.outNetwork.link(nnNetworkOut.input)
+
 
 # Connect to device and start pipeline
 device =dai.Device(pipeline)
@@ -130,7 +135,6 @@ previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
 detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
 xoutBoundingBoxDepthMappingQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
 depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
-networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False);
 
 # Coordenadas del centro de la imagen
 x0 = width//2
@@ -156,14 +160,14 @@ while True:
     inPreview = previewQueue.get()
     inDet = detectionNNQueue.get()
     depth = depthQueue.get()
-    inNN = networkQueue.get()
+
 
     frame = inPreview.getCvFrame()
-    depthFrame = depth.getFrame() # depthFrame values are in millimeters
+    depthFrame = depth.getFrame()
+    depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
+    depthFrameColor = cv2.equalizeHist(depthFrameColor)
+    depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
-    #depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-    #depthFrameColor = cv2.equalizeHist(depthFrameColor)
-    #depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_JET)
 
     counter+=1
     current_time = time.monotonic()
@@ -206,7 +210,7 @@ while True:
         cv2.line(frame, (x0, y0), (x1, y2), LineColor, 2)
 
     cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.4, TextColor)
-    cv2.imshow("depth", depthFrame)
+    cv2.imshow("depth", depthFrameColor)
     cv2.imshow("rgb", frame)
 
     # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
