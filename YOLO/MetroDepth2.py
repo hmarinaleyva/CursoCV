@@ -144,9 +144,9 @@ while True:
     frame = inPreview.getCvFrame()
     depthFrame = depth.getFrame() # depthFrame values are in millimeters
 
-    depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-    depthFrameColor = cv2.equalizeHist(depthFrameColor)
-    depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
+    #depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
+    #depthFrameColor = cv2.equalizeHist(depthFrameColor)
+    #depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_JET)
 
     counter+=1
     current_time = time.monotonic()
@@ -160,17 +160,16 @@ while True:
         boundingBoxMapping = xoutBoundingBoxDepthMappingQueue.get()
         roiDatas = boundingBoxMapping.getConfigData()
 
-        for roiData in roiDatas:
-            roi = roiData.roi
-            roi = roi.denormalize(depthFrameColor.shape[1], depthFrameColor.shape[0])
-            topLeft = roi.topLeft()
-            bottomRight = roi.bottomRight()
-            xmin = int(topLeft.x)
-            ymin = int(topLeft.y)
-            xmax = int(bottomRight.x)
-            ymax = int(bottomRight.y)
-
-            cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), TextColor, FontFace)
+        #for roiData in roiDatas:
+        #    roi = roiData.roi
+        #    roi = roi.denormalize(depthFrameColor.shape[1], depthFrameColor.shape[0])
+        #    topLeft = roi.topLeft()
+        #    bottomRight = roi.bottomRight()
+        #    xmin = int(topLeft.x)
+        #    ymin = int(topLeft.y)
+        #    xmax = int(bottomRight.x)
+        #    ymax = int(bottomRight.y)
+        #    cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), TextColor, FontFace)
 
 
     for detection in detections:
@@ -190,7 +189,7 @@ while True:
         cv2.line(frame, (x0, y0), (x1, y2), LineColor, 2)
 
     cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.4, TextColor)
-    cv2.imshow("depth", depthFrameColor)
+    cv2.imshow("depth", depthFrame)
     cv2.imshow("rgb", frame)
 
     # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 

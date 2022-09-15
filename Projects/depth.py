@@ -9,10 +9,6 @@ import cv2, os, math
 MainDir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(MainDir)
 
-# Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
-MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
-CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
-
 # Create pipeline
 pipeline = dai.Pipeline()
 
@@ -39,7 +35,7 @@ xoutDepth = pipeline.create(dai.node.XLinkOut)
 xoutDepth.setStreamName("depth")
 stereo.depth.link(xoutDepth.input)
 
-xoutDepth = pipeline.create(dai.node.XLinkOut)
+#xoutDepth = pipeline.create(dai.node.XLinkOut)
 xoutDepth.setStreamName("disp")
 stereo.disparity.link(xoutDepth.input)
 
@@ -47,8 +43,8 @@ stereo.disparity.link(xoutDepth.input)
 device = dai.Device(pipeline)
 
 # Output queue will be used to get the depth frames from the outputs defined above
-depthQueue = device.getOutputQueue(name="depth")
-dispQ = device.getOutputQueue(name="disp")
+depthQueue  = device.getOutputQueue(name="depth")
+dispQ       = device.getOutputQueue(name="disp")
 
 text = TextHelper()
 hostSpatials = HostSpatialsCalc(device)
@@ -58,7 +54,6 @@ step = 3
 delta = 5
 hostSpatials.setDeltaRoi(delta)
 
-print("Use WASD keys to move ROI.\nUse 'r' and 'f' to change ROI size.")
 
 while True:
     depthFrame = depthQueue.get().getFrame()
@@ -71,12 +66,13 @@ while True:
     disp = cv2.applyColorMap(disp, cv2.COLORMAP_JET)
 
     text.rectangle(disp, (x-delta, y-delta), (x+delta, y+delta))
-    text.putText(disp, "X: " + ("{:.1f}m".format(spatials['x']/1000) if not math.isnan(spatials['x']) else "--"), (x + 10, y + 20))
-    text.putText(disp, "Y: " + ("{:.1f}m".format(spatials['y']/1000) if not math.isnan(spatials['y']) else "--"), (x + 10, y + 35))
-    text.putText(disp, "Z: " + ("{:.1f}m".format(spatials['z']/1000) if not math.isnan(spatials['z']) else "--"), (x + 10, y + 50))
+    print("x: ", spatials['z']/1000, "\t", "y: ", spatials['x']/1000, "\t", "z: ", spatials['y']/1000)
+    #text.putText(disp, "X: " + ("{:.1f}m".format(spatials['x']/1000) if not math.isnan(spatials['x']) else "--"), (x + 10, y + 20))
+    #text.putText(disp, "Y: " + ("{:.1f}m".format(spatials['y']/1000) if not math.isnan(spatials['y']) else "--"), (x + 10, y + 35))
+    #text.putText(disp, "Z: " + ("{:.1f}m".format(spatials['z']/1000) if not math.isnan(spatials['z']) else "--"), (x + 10, y + 50))
 
     # Show the frame
-    cv2.imshow("depth", disp)
+    cv2.imshow("depth", depthFrame)
 
     key = cv2.waitKey(1)
     if key in [27, 32, ord('q')]: # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q}
