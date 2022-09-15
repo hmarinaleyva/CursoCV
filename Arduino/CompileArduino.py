@@ -1,8 +1,8 @@
 import os, subprocess, serial
 
-SketchPath = 'ArduinoTest'
+SketchPath = './ArduinoTest'
 MainDir = os.path.dirname(os.path.abspath(__file__))
-ArduinoSketchDir = os.path.join(MainDir, '../Arduino', SketchPath)
+ArduinoSketchDir = os.path.join(MainDir, '.', SketchPath)
 os.chdir(ArduinoSketchDir)
 
 try:
