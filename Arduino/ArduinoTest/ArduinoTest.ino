@@ -22,7 +22,13 @@ int dato;
 #define NOTE_G4     392 // Definir la frecuencia de la nota G4 (392 Hz)
 #define NOTE_A4     440 // Definir la frecuencia de la nota A4 (440 Hz)
 #define NOTE_B4     494 // Definir la frecuencia de la nota B4 (494 Hz)
-#define DURATION    50  // Definir la duración de las notas musicales en milisegundos
+#define DURATION    100  // Definir la duración de las notas musicales en milisegundos
+
+
+void Bip() {
+  tone(PIN_BUZZER, NOTE_A3, DURATION); // Emite un bip de 100 milisegundos
+  delay(10); // Espera 10 milisegundos
+}
 
 
 void CMajor7_Arpeggio() {
@@ -34,7 +40,6 @@ void CMajor7_Arpeggio() {
     delay(DURATION);
     tone(PIN_BUZZER, NOTE_B4, DURATION);
 }
-
 
 void D7_Arpeggio() {
     tone(PIN_BUZZER, NOTE_D4, DURATION);
@@ -86,19 +91,19 @@ void loop() {
 
         // Comprueba el dato recibido
         if (dato == 48){ // Si el dato enviado es 0 (48 codificado en ASCII) 
-            CMajor7_Arpeggio();
+            tone(PIN_BUZZER, NOTE_C3, DURATION);
         }
         
         if (dato == 49){ // Si el dato enviado es 1 (49 codificado en ASCII) 
-            D7_Arpeggio();
+            tone(PIN_BUZZER, NOTE_E3, DURATION);
         }
         if (dato == 50){ // Si el dato enviado es 2 (50 codificado en ASCII)
-            E7_Arpeggio();
+            tone(PIN_BUZZER, NOTE_G3, DURATION);
         }
 
         // Interfaz de control háptico
         if (dato == 51){ // Si el dato enviado es 3 (51 codificado en ASCII)
-            tone(PIN_UP, 220, 100); // Activa el vibrador UP por 100 ms
+            tone(PIN_BUZZER, NOTE_B3, DURATION); // Activa el vibrador UP por 100 ms
         }
         if (dato == 52){ // Si el dato enviado es 4 (52 codificado en ASCII)
             tone(PIN_DOWN, 220, 100); // Activa el vibrador DOWN por 100 ms

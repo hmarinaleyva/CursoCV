@@ -10,34 +10,6 @@ os.chdir(MainDir)
 
 # Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
 MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
-CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
-
-#######################################################################################################################
-
-
-# initialize blob manager with path to the blob
-bm = BlobManager(blobPath=MODEL_PATH)
-
-nm = NNetManager(nnFamily="YOLO", inputSize=4)
-nm.readConfig(CONFIG_PATH)  # this will also parse the correct input size
-
-pm = PipelineManager()
-pm.createColorCam(previewSize=nm.inputSize, xout=True)
-
-# create preview manager
-fpsHandler = FPSHandler()
-pv = PreviewManager(display=[Previews.color.name], fpsHandler=fpsHandler)
-
-# create depthai.node.NeuralNetwork
-YoloNN = nm.createNN(pipeline=pm.pipeline, nodes=pm.nodes, source=Previews.color.name,
-                 blobPath=bm.getBlob(shaves=6, openvinoVersion=pm.pipeline.getOpenVINOVersion(), zooType="depthai"))
-
-#pm.addNn(YoloNN)
-pm.addNn(YoloNN)
-
-
-######################################################################################################################
-
 
 # Anhcho y alto de la imagen de entrada a la red neuronal
 width, height = 640, 480
@@ -45,8 +17,7 @@ width, height = 640, 480
 # Ruta absoluta del modelo
 nnBlobPath = MODEL_PATH
 
-labelMap = [
-            "down",
+labelMap = ["down",
             "emergency",
             "emergency-forward",
             "emergency-left",
@@ -66,10 +37,34 @@ pipeline = dai.Pipeline()
 camRgb = pipeline.create(dai.node.ColorCamera)
 spatialDetectionNetwork = pipeline.create(dai.node.YoloSpatialDetectionNetwork)
 
-# Define sources and outputs for the spatial detection network
+# Define sources and outputs for Stereo Depth (SD)
 monoLeft = pipeline.create(dai.node.MonoCamera)
 monoRight = pipeline.create(dai.node.MonoCamera)
 stereo = pipeline.create(dai.node.StereoDepth)
+
+# Properties for SD
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+
+stereo.initialConfig.setConfidenceThreshold(255)
+stereo.setLeftRightCheck(True)
+stereo.setSubpixel(False)
+
+# Linking for SD
+monoLeft.out.link(stereo.left)
+monoRight.out.link(stereo.right)
+
+xoutDepth = pipeline.create(dai.node.XLinkOut)
+xoutDepth.setStreamName("depth")
+stereo.depth.link(xoutDepth.input)
+
+xoutDepth = pipeline.create(dai.node.XLinkOut)
+xoutDepth.setStreamName("disp")
+stereo.disparity.link(xoutDepth.input)
+
+
 
 nnNetworkOut = pipeline.create(dai.node.XLinkOut)
 
@@ -90,10 +85,6 @@ camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 
-monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
 # setting node configs
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
