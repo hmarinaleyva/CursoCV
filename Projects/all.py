@@ -15,6 +15,7 @@ from depthai_sdk import Previews, FPSHandler
 from depthai_sdk.managers import PipelineManager, PreviewManager, BlobManager, NNetManager
 import depthai as dai
 import cv2, os, time
+from scipy import spatial
 
 # Cambiar la ruta de ejecución aquí
 MainDir = os.path.dirname(os.path.abspath(__file__))
@@ -124,7 +125,16 @@ previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
 detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
 xoutBoundingBoxDepthMappingQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
 depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
-networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False);
+networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False)
+
+
+# Calcular el objeto detectado más cercano al centro de la imagen
+def Nearest_Coordinate(Point, Centroids):
+    x0, y0 = Point
+    minDist = min((x-x0)**2 + (y-y0)**2 for x, y in Centroids)
+    for x, y in Centroids:
+        if (x-x0)**2 + (y-y0)**2 == minDist:
+            return x, y
 
 # Coordenadas del centro de la imagen
 x0 = width//2
@@ -156,19 +166,24 @@ while True:
 
 
     if len(detections) != 0:
-        boundingBoxMapping = xoutBoundingBoxDepthMappingQueue.get()
-        roiDatas = boundingBoxMapping.getConfigData()
 
-        for detection in detections: 
+        # Coordenadas del centro de los objetos detectados
+        Centroids = []
+
+        for detection in detections:
+
+            detection_label = str(labelMap[detection.label])
+
             # Calcular los vertices de la caja delimitadora
             x1 = int(detection.xmin * width)
             x2 = int(detection.xmax * width)
             y1 = int(detection.ymin * height)
             y2 = int(detection.ymax * height)
             
-            # Calcular el centro de la caja delimitadora
+            # Calcular el centro de la caja delimitadora y agregarlo a la lista de centroides
             x = (x1 + x2) // 2
             y = (y1 + y2) // 2
+            Centroids.append((x,y))
 
             # Calcular el ancho y alto de la caja delimitadora
             w = x2 - x1
@@ -176,22 +191,21 @@ while True:
 
             # Calcular la distancia a la caja delimitadora
             z = detection.spatialCoordinates.z/1000
-            confidence = detection.confidence*100
+            confidence = detection.confidence*100            
 
-            try:
-                label = labelMap[detection.label]
-            except:
-                label = detection.label
-
-            # drwawing info
-            cv2.putText(frame, str(label) , (x1, y1), FontFace, FontSize, TextColor, 2)
-            
-            
+            # Escribir información de la detección en el frame
+            cv2.putText(frame, detection_label , (x1, y1), FontFace, FontSize, TextColor, 2)
             cv2.putText(frame, "{:.2f} %".format(confidence), (x2, y), FontFace, FontSize, TextColor, 1)
             cv2.putText(frame, "Z: {:.3f} mm".format(z) , (x1, y+h), FontFace, FontSize, TextColor)
 
-            cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, BoxesSize)
-            cv2.line(frame, (x0, y0), (x, y), LineColor, 2)
+
+        # Calcular el objeto detectado más cercano al centro de la imagen
+        x, y = Nearest_Coordinate((x0,y0), Centroids)
+
+        # draw bounding box an line
+        cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, BoxesSize)
+        cv2.line(frame, (x0, y0), (x, y), LineColor, 2)
+        
 
     cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.4, TextColor)
     cv2.imshow("depth", depthFrameColor)
