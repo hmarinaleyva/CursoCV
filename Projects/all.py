@@ -142,28 +142,36 @@ y0 = height//2
 
 # Estilos de dibujo (colores y timpografía)
 BoxesColor = (0, 255, 0)
-BoxesSize = 1
+BoxesSize = 2
 LineColor = (0, 0, 255)
 CircleColor = (255, 0, 0)
 TextColor = (0, 255, 255)
 FontFace = cv2.FONT_HERSHEY_SIMPLEX # Fuente de texto
 FontSize = 0.5 # Tamaño de la fuente
 
-# Variables de tiempo y velocidad 
+# Variables de tiempo y frecuancia de actualización de fotogramas 
 fps = 0
-time = 0
+previous_frame_time = 0
 
+ShowDepthFrameColor = False
 while True:
 
+    # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
+    if cv2.waitKey(1) in [27, 32, ord('q')]:
+        device.close()
+        break
 
+    # Calcular fps con el tiempo de actualización del fotograma anterior 
+    fps = 1 / (time.time() - previous_frame_time) 
+
+    # Obtener el fotograma de la cámara RGB
     frame = previewQueue.get().getCvFrame()
-    detections = detectionNNQueue.get().detections
 
+    # Obtener el fotograma de profundidad    
     depthFrame = depthQueue.get().getFrame()
-    depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
-    depthFrameColor = cv2.equalizeHist(depthFrameColor)
-    depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
 
+    # Obtener los datos de la red neuronal
+    detections = detectionNNQueue.get().detections
 
     if len(detections) != 0:
 
@@ -206,11 +214,17 @@ while True:
         # Dibujar una checha que indique el objeto más cercano desde centro de la imágen
         cv2.arrowedLine(frame, (x0, y0), (x, y), LineColor, 2)
         
+    
+    if ShowDepthFrameColor:
+        depthFrameColor = cv2.normalize(depthFrame, None, 255, 0, cv2.NORM_INF, cv2.CV_8UC1)
+        depthFrameColor = cv2.equalizeHist(depthFrameColor)
+        depthFrameColor = cv2.applyColorMap(depthFrameColor, cv2.COLORMAP_HOT)
+        cv2.imshow("depth", depthFrameColor)
 
+    # Mostar fps 
+    cv2.putText(frame, "FPS: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.75, TextColor) 
     cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), FontFace, 0.4, TextColor)
-    cv2.imshow("depth", depthFrameColor)
     cv2.imshow("rgb", frame)
 
-    # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
-    if cv2.waitKey(1) in [27, 32, ord('q')]:
-        break
+    # Iniciar el contador de tiempo para calcular los FPS swl siguiente fotograma
+    frame_time = time.time() 
