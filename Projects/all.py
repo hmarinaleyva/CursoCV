@@ -1,3 +1,5 @@
+from operator import index
+from tkinter import HORIZONTAL
 import serial, subprocess
 
 try: #intenta abrir el puerto serie
@@ -131,9 +133,9 @@ networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False
 def Nearest_Coordinate(OriginPoint, Centroids):
     x0, y0 = OriginPoint
     minDist = min((x-x0)**2 + (y-y0)**2 for x, y in Centroids)
-    for x, y in Centroids:
+    for index, (x, y) in enumerate(Centroids):
         if (x-x0)**2 + (y-y0)**2 == minDist:
-            return x, y
+            return x, y, index
 
 
 def indicate_direction(OriginPoint, EndPoint):
@@ -152,7 +154,6 @@ def indicate_direction(OriginPoint, EndPoint):
         else:
             return "up"
 
-
 # Coordenadas del centro de la imagen
 x0 = width//2
 y0 = height//2
@@ -166,16 +167,21 @@ TextColor = (0, 255, 255)
 FontFace = cv2.FONT_HERSHEY_SIMPLEX # Fuente de texto
 FontSize = 0.5 # Tamaño de la fuente
 
-# Variables de tiempo y frecuancia de actualización de fotogramas 
-start_time = time.time()
-counter = 0
-fps = 0
-
 # Depth variables
 text = TextHelper()
 hostSpatials = HostSpatialsCalc(device)
 hostSpatials.setDeltaRoi(15)
 ShowDepthFrameColor = False
+
+# Variables de tiempo y frecuancia de actualización de fotogramas 
+start_time_up    = 0
+start_time_down  = 0
+start_time_left  = 0
+start_time_right = 0
+start_time_frame = 0
+
+fps = 0
+frames = 0
 while True:
 
     # Obtener el fotograma de la cámara RGB
@@ -209,22 +215,37 @@ while True:
             Centroids.append((x,y))
 
             # Calcular la distancia a la caja delimitadora
-            z = detection.spatialCoordinates.z
+            X = detection.spatialCoordinates.x
+            Y = detection.spatialCoordinates.y
+            Z = detection.spatialCoordinates.z
+            distance = math.sqrt(X**2 + Y**2 + Z**2)/1000
 
             # Escribir información de la detección en el frame
             cv2.putText(frame, detection_label , (x1, y1), FontFace, FontSize, TextColor, 2)
             cv2.putText(frame, "{:.0f} %".format(confidence), (x2, y), FontFace, FontSize, TextColor, 1)
-            cv2.putText(frame, "Z: {:.3f} m".format(z) , (x2, y2), FontFace, FontSize, TextColor)
+            cv2.putText(frame, "{:.2f} [m]".format(distance) , (x2, y2), FontFace, FontSize, TextColor)
             cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, BoxesSize)
 
 
         # Calcular el objeto detectado más cercano al centro de la imágen
-        x, y = Nearest_Coordinate((x0,y0), Centroids)
+        x, y, index = Nearest_Coordinate((x0,y0), Centroids)
 
-        # Calcular la dirección hacia el objeto más cercano {"right", "left", "up", "down"}
-        direction = indicate_direction((x0,y0), (x,y))
+        # Calcular la distancia horizontal y vertical al objeto más cercano
+        HorizontalDistance = abs(x - x0)
+        VerticalDistance = abs(y - y0)
 
-        # Dibujar una checha que indique el objeto más cercano desde centro de la imágen
+        # 
+        if HorizontalDistance > VerticalDistance:
+            fx = ( (x - x0)/(2*width) + 1)**8 -1
+            if time.time() - start_time_right > fx :
+                if (x - x0) > 0: # El objeto está a la derecha del centro de la imagen
+                    ArduinoSerial.write(b'0')
+                else: # El objeto está a la izquierda del centro de la imagen
+                    ArduinoSerial.write(b'1')
+                start_time_right = time.time()
+
+
+        # Dibujar una flecha que indique el objeto más cercano desde centro de la imágen
         cv2.arrowedLine(frame, (x0, y0), (x, y), LineColor, 2)
 
 
@@ -247,11 +268,11 @@ while True:
     cv2.imshow("rgb", frame)
 
     # Calcular fps con el tiempo de actualización del fotograma anterior 
-    counter += 1
-    if (time.time() - start_time) > 1:
-        fps = counter / (time.time() - start_time)
-        counter = 0
-        start_time = time.time()
+    frames += 1
+    if (time.time() - start_time_frame) > 1:
+        fps = frames / (time.time() - start_time_frame)
+        frames = 0
+        start_time_frame = time.time()
     
     # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
     if cv2.waitKey(1) in [27, 32, ord('q')]:
