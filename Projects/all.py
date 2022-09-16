@@ -179,6 +179,7 @@ start_time_down  = 0
 start_time_left  = 0
 start_time_right = 0
 start_time_frame = 0
+start_time_horizontal = 0
 
 fps = 0
 frames = 0
@@ -242,7 +243,7 @@ while True:
                     ArduinoSerial.write(b'0')
                 else: # El objeto está a la izquierda del centro de la imagen
                     ArduinoSerial.write(b'1')
-                start_time_right = time.time()
+                start_time_horizontal = time.time()
 
 
         # Dibujar una flecha que indique el objeto más cercano desde centro de la imágen
