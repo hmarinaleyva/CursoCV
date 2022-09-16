@@ -100,7 +100,7 @@ spatialDetectionNetwork.setCoordinateSize(4)
 spatialDetectionNetwork.setAnchors([10.0,13.0,16.0,30.0,33.0,23.0,30.0,61.0,62.0,45.0,59.0,119.0,116.0,90.0,156.0,198.0,373.0,326.0])
 spatialDetectionNetwork.setAnchorMasks({"side80": [0,1,2], "side40": [3,4,5], "side20": [6,7,8]})
 spatialDetectionNetwork.setIouThreshold(0.5)
-spatialDetectionNetwork.setConfidenceThreshold(0.5)
+spatialDetectionNetwork.setConfidenceThreshold(0.6)
 
 # Linking
 monoLeft.out.link(stereo.left)
@@ -172,12 +172,8 @@ hostSpatials.setDeltaRoi(15)
 ShowDepthFrameColor = False
 
 # Variables de tiempo y frecuancia de actualización de fotogramas 
-start_time_up    = 0
-start_time_down  = 0
-start_time_left  = 0
-start_time_right = 0
-start_time_frame = 0
-start_time_horizontal = 0
+frame_time = 0
+move_time = 0
 
 fps = 0
 frames = 0
@@ -233,16 +229,24 @@ while True:
         HorizontalDistance = abs(x - x0)
         VerticalDistance = abs(y - y0)
 
-        # 
+
         if HorizontalDistance > VerticalDistance:
             fx = ( (x - x0)/(2*width) + 1)**8 -1
-            if time.time() - start_time_horizontal > fx :
+            if time.time() - move_time > fx :
                 if (x - x0) > 0: # El objeto está a la derecha del centro de la imagen
-                    ArduinoSerial.write(b'0')
+                    ArduinoSerial.write(b'R') # 68 ASCII
                 else: # El objeto está a la izquierda del centro de la imagen
-                    ArduinoSerial.write(b'3')
-                start_time_horizontal = time.time()
+                    ArduinoSerial.write(b'L') # 76 ASCII
+                move_time = time.time()
+        else: 
+            fy = ( (y - y0)/(2*height) + 1)**8 -1
+            if time.time() - move_time > fy :
+                if (y - y0) > 0: # El objeto está abajo del centro de la imagen
+                    ArduinoSerial.write(b'D') # 82 ASCII
+                else: # El objeto está arriba del centro de la imagen
+                    ArduinoSerial.write(b'U') # 85 ASCII
 
+                move_time = time.time()
 
         # Dibujar una flecha que indique el objeto más cercano desde centro de la imágen
         cv2.arrowedLine(frame, (x0, y0), (x, y), LineColor, 2)
@@ -268,10 +272,10 @@ while True:
 
     # Calcular fps con el tiempo de actualización del fotograma anterior 
     frames += 1
-    if (time.time() - start_time_frame) > 1:
-        fps = frames / (time.time() - start_time_frame)
+    if (time.time() - frame_time) > 1:
+        fps = frames / (time.time() - frame_time)
         frames = 0
-        start_time_frame = time.time()
+        frame_time = time.time()
     
     # Salir del programa si alguna de estas teclas son presionadas {ESC, SPACE, q} 
     if cv2.waitKey(1) in [27, 32, ord('q')]:

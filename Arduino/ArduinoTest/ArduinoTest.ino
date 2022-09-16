@@ -89,7 +89,23 @@ void loop() {
         dato = Serial.read();   // Lee el dato enviado por el puerto serie usando código ASCII
         Serial.write(dato);     // Envia el dato por el puerto serie codificado en ASCII
 
-        // Comprueba el dato recibido
+
+        if (dato == 68){ // Si el dato resivido es R (codificado en ASCII)
+            tone(PIN_BUZZER, NOTE_C3, DURATION);
+        }
+
+        if (dato == 76){ // Si el dato resivido es D (codificado en ASCII)
+            tone(PIN_BUZZER, NOTE_E3, DURATION);
+        }
+
+        if (dato == 82){ // Si el dato resivido es D (codificado en ASCII)
+            tone(PIN_BUZZER, NOTE_G3, DURATION);
+        }
+
+        if (dato == 85){ // Si el dato resivido es U (codificado en ASCII)
+            tone(PIN_BUZZER, NOTE_B3, DURATION);
+        }
+
         if (dato == 48){ // Si el dato enviado es 0 (48 codificado en ASCII) 
             tone(PIN_BUZZER, NOTE_C3, DURATION);
         }
