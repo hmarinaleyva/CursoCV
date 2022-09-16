@@ -1,5 +1,3 @@
-from operator import index
-from tkinter import HORIZONTAL
 import serial, subprocess
 
 try: #intenta abrir el puerto serie
@@ -238,11 +236,11 @@ while True:
         # 
         if HorizontalDistance > VerticalDistance:
             fx = ( (x - x0)/(2*width) + 1)**8 -1
-            if time.time() - start_time_right > fx :
+            if time.time() - start_time_horizontal > fx :
                 if (x - x0) > 0: # El objeto está a la derecha del centro de la imagen
                     ArduinoSerial.write(b'0')
                 else: # El objeto está a la izquierda del centro de la imagen
-                    ArduinoSerial.write(b'1')
+                    ArduinoSerial.write(b'3')
                 start_time_horizontal = time.time()
 
 
