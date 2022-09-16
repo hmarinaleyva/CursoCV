@@ -175,6 +175,10 @@ ShowDepthFrameColor = False
 frame_time = 0
 move_time = 0
 
+
+# anonimus function f(x) = (x + 1)^2 - 1
+f = lambda x: (x + 1)**2 - 1
+
 fps = 0
 frames = 0
 while True:
@@ -229,23 +233,20 @@ while True:
         HorizontalDistance = abs(x - x0)
         VerticalDistance = abs(y - y0)
 
-
         if HorizontalDistance > VerticalDistance:
-            fx = ( (x - x0)/(2*width) + 1)**8 -1
-            if time.time() - move_time > fx :
+
+            if time.time() - move_time > f(HorizontalDistance/(2*width)):
                 if (x - x0) > 0: # El objeto está a la derecha del centro de la imagen
                     ArduinoSerial.write(b'R') # 68 ASCII
                 else: # El objeto está a la izquierda del centro de la imagen
                     ArduinoSerial.write(b'L') # 76 ASCII
                 move_time = time.time()
         else: 
-            fy = ( (y - y0)/(2*height) + 1)**8 -1
-            if time.time() - move_time > fy :
+            if time.time() - move_time > f(VerticalDistance/(2*height)):
                 if (y - y0) > 0: # El objeto está abajo del centro de la imagen
                     ArduinoSerial.write(b'D') # 82 ASCII
                 else: # El objeto está arriba del centro de la imagen
                     ArduinoSerial.write(b'U') # 85 ASCII
-
                 move_time = time.time()
 
         # Dibujar una flecha que indique el objeto más cercano desde centro de la imágen
