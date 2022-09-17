@@ -30,18 +30,32 @@ width, height = 640, 480
 # Ruta absoluta del modelo
 nnBlobPath = MODEL_PATH
 
-etiquetaMapa = [
+labelMap = [
+            "down",
+            "emergency",
+            "emergency-forward",
+            "emergency-right",
+            "emergency-left",
+            "forward",
+            "handicapped",
+            "left",
+            "line one",
+            "line-three",
+            "right"
+        ]
+
+spanishLabelMap = [
             "abajo",
             "emergencia",
-            "emergencia-hacia adelante",
-            "derecho de emergencia",
-            "emergencia-izquierda",
-            "delantero",
+            "emergencia adelante",
+            "emergencia derecha",
+            "emergencia izquierda",
+            "adelante",
             "minusválido",
             "izquierda",
             "línea uno",
             "línea tres",
-            "Correcto"
+            "derecha"
         ]
 
 # Create pipeline
@@ -126,24 +140,34 @@ xoutBoundingBoxDepthMappingQueue = device.getOutputQueue(name="boundingBoxDepthM
 depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
 networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False)
 
-# Calcular coordenadas de los vertices y el centro de un bounding box 
+# Calcular coordenadas de los vertices un bounding box 
 def Vertices(detection):        
     x1 = int(detection.xmin * width)
     x2 = int(detection.xmax * width)
     y1 = int(detection.ymin * height)
     y2 = int(detection.ymax * height)
-    x  = int((x1 + x2) / 2)
-    y  = int((y1 + y2) / 2)
-    return x1, x2, y1, y2, x, y
+    return x1, x2, y1, y2
 
-# Calcular el objeto detectado más cercano al centro de la imagen
+# Calcular la coordenada del centro de un bounding box
+def Center(x1, x2, y1, y2):
+    x = int((x1 + x2) / 2)
+    y = int((y1 + y2) / 2)
+    return x, y
+
+# Calcular la distancia de un objeto a la camara
+def distance_to_camera(detection):
+    X = detection.spatialCoordinates.x
+    Y = detection.spatialCoordinates.y
+    Z = detection.spatialCoordinates.z
+    return math.sqrt(X * X + Y * Y + Z * Z)
+
+# Calcular el centroide del bounding box más cercano a la coordenada OriginPoint
 def Nearest_Coordinate(OriginPoint, Centroids):
     x0, y0 = OriginPoint
     minDist = min((x-x0)**2 + (y-y0)**2 for x, y in Centroids)
     for index, (x, y) in enumerate(Centroids):
         if (x-x0)**2 + (y-y0)**2 == minDist:
             return x, y, index
-
 
 # Coordenadas del centro de la imagen
 x0 = width//2
@@ -164,14 +188,15 @@ hostSpatials = HostSpatialsCalc(device)
 hostSpatials.setDeltaRoi(15)
 ShowDepthFrameColor = False
 
-# Variables de tiempo y frecuancia de actualización de fotogramas 
+# Variables de tiempo
 frame_time = 0
 move_time = 0
+
+mentioned_object = False # Variable para evitar que se repita el nombre del objeto detectado
 
 # anonimus functions
 f1 = lambda x: math.sqrt(1 + x) - 1
 f2 = lambda x: (x + 1)**2 - 1
-
 
 fps = 0
 frames = 0
@@ -197,21 +222,14 @@ while True:
             confidence = detection.confidence*100
 
             # Calcular los vertices de la caja delimitadora
-            x1 = int(detection.xmin * width)
-            x2 = int(detection.xmax * width)
-            y1 = int(detection.ymin * height)
-            y2 = int(detection.ymax * height)
+            x1, x2, y1, y2 = Vertices(detection)
             
             # Calcular el centro de la caja delimitadora y agregarlo a la lista de centroides
-            x = (x1 + x2) // 2
-            y = (y1 + y2) // 2
-            Centroids.append((x,y))
+            x, y = Center(x1, x2, y1, y2)
+            Centroids.append((x, y))
 
             # Calcular la distancia a la caja delimitadora
-            X = detection.spatialCoordinates.x
-            Y = detection.spatialCoordinates.y
-            Z = detection.spatialCoordinates.z
-            distance = math.sqrt(X**2 + Y**2 + Z**2)/1000
+            distance = distance_to_camera(detection)
 
             # Escribir información de la detección en el frame
             cv2.putText(frame, detection_label , (x1, y1), FontFace, FontSize, TextColor, 2)
@@ -222,12 +240,16 @@ while True:
 
         # Calcular el objeto detectado más cercano al centro de la imágen
         x, y, index = Nearest_Coordinate((x0,y0), Centroids)
-        Nearest_label = str(labelMap[detections[index].label])
+        nearest_translated_label = str(spanishLabelMap[detections[index].label])
 
         # Si el centro de la imágen está dentro de la caja delimitadora del objeto más cercano
         if x1 < x0 < x2 and y1 < y0 < y2:
-            os.system('spd-say "' + Nearest_label + '"')
-            ArduinoSerial.write(b'0')
+
+            if not mentioned_object:
+                os.system('spd-say "' + nearest_translated_label + '"')
+                ArduinoSerial.write(b'DLRU')
+                mentioned_object = True
+
         else: 
             # Calcular la distancia horizontal y vertical al objeto más cercano
             HorizontalDistance = abs(x - x0)
@@ -241,13 +263,16 @@ while True:
                     else: # El objeto está a la izquierda del centro de la imagen
                         ArduinoSerial.write(b'L') # 76 ASCII
                     move_time = time.time()
-            else: 
+            else:
+
                 if f1(time.time() - move_time) > f2(VerticalDistance/(2*height)):
                     if (y - y0) > 0: # El objeto está abajo del centro de la imagen
                         ArduinoSerial.write(b'D') # 82 ASCII
                     else: # El objeto está arriba del centro de la imagen
                         ArduinoSerial.write(b'U') # 85 ASCII
                     move_time = time.time()
+
+            mentioned_object = False
 
         # Dibujar una flecha que indique el objeto más cercano desde centro de la imágen
         cv2.arrowedLine(frame, (x0, y0), (x, y), LineColor, 2)

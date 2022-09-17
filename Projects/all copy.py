@@ -9,7 +9,7 @@ except:
     print("No se estableció comunicación serial con una placa Arduino correctamente")
     exit()
 
-ArduinoSerial.write(b'0123456') #enviar una cadena de bytes
+ArduinoSerial.write(b'0DLRU') #enviar una cadena de bytes
 
 from utilities import *
 import depthai as dai
