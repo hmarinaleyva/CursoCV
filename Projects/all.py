@@ -126,6 +126,15 @@ xoutBoundingBoxDepthMappingQueue = device.getOutputQueue(name="boundingBoxDepthM
 depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
 networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False)
 
+# Calcular coordenadas de los vertices y el centro de un bounding box 
+def Vertices(detection):        
+    x1 = int(detection.xmin * width)
+    x2 = int(detection.xmax * width)
+    y1 = int(detection.ymin * height)
+    y2 = int(detection.ymax * height)
+    x  = int((x1 + x2) / 2)
+    y  = int((y1 + y2) / 2)
+    return x1, x2, y1, y2, x, y
 
 # Calcular el objeto detectado más cercano al centro de la imagen
 def Nearest_Coordinate(OriginPoint, Centroids):
@@ -135,22 +144,6 @@ def Nearest_Coordinate(OriginPoint, Centroids):
         if (x-x0)**2 + (y-y0)**2 == minDist:
             return x, y, index
 
-
-def indicate_direction(OriginPoint, EndPoint):
-    x0, y0 = OriginPoint
-    x, y = EndPoint
-    HorizontalDistance = x - x0
-    VerticalDistance = y - y0
-    if abs(HorizontalDistance) > abs(VerticalDistance):
-        if HorizontalDistance > 0:
-            return "right"
-        else:
-            return "left"
-    else:
-        if VerticalDistance > 0:
-            return "down"
-        else:
-            return "up"
 
 # Coordenadas del centro de la imagen
 x0 = width//2
@@ -175,9 +168,10 @@ ShowDepthFrameColor = False
 frame_time = 0
 move_time = 0
 
+# anonimus functions
+f1 = lambda x: math.sqrt(1 + x) - 1
+f2 = lambda x: (x + 1)**2 - 1
 
-# anonimus function f(x) = (x + 1)^2 - 1
-f = lambda x: (x + 1)**2 - 1
 
 fps = 0
 frames = 0
@@ -229,30 +223,32 @@ while True:
         # Calcular el objeto detectado más cercano al centro de la imágen
         x, y, index = Nearest_Coordinate((x0,y0), Centroids)
 
-        # Calcular la distancia horizontal y vertical al objeto más cercano
-        HorizontalDistance = abs(x - x0)
-        VerticalDistance = abs(y - y0)
-
-        if HorizontalDistance > VerticalDistance:
-
-            if time.time() - move_time > f(HorizontalDistance/(2*width)):
-                if (x - x0) > 0: # El objeto está a la derecha del centro de la imagen
-                    ArduinoSerial.write(b'R') # 68 ASCII
-                else: # El objeto está a la izquierda del centro de la imagen
-                    ArduinoSerial.write(b'L') # 76 ASCII
-                move_time = time.time()
+        # Si el centro de la imágen está dentro de la caja delimitadora del objeto más cercano
+        if x1 < x0 < x2 and y1 < y0 < y2:
+            ArduinoSerial.write(b'0')
         else: 
-            if time.time() - move_time > f(VerticalDistance/(2*height)):
-                if (y - y0) > 0: # El objeto está abajo del centro de la imagen
-                    ArduinoSerial.write(b'D') # 82 ASCII
-                else: # El objeto está arriba del centro de la imagen
-                    ArduinoSerial.write(b'U') # 85 ASCII
-                move_time = time.time()
+            # Calcular la distancia horizontal y vertical al objeto más cercano
+            HorizontalDistance = abs(x - x0)
+            VerticalDistance = abs(y - y0)
+
+            if HorizontalDistance > VerticalDistance:
+
+                if f1(time.time() - move_time) > f2(HorizontalDistance/(2*width)):
+                    if (x - x0) > 0: # El objeto está a la derecha del centro de la imagen
+                        ArduinoSerial.write(b'R') # 68 ASCII
+                    else: # El objeto está a la izquierda del centro de la imagen
+                        ArduinoSerial.write(b'L') # 76 ASCII
+                    move_time = time.time()
+            else: 
+                if f1(time.time() - move_time) > f2(VerticalDistance/(2*height)):
+                    if (y - y0) > 0: # El objeto está abajo del centro de la imagen
+                        ArduinoSerial.write(b'D') # 82 ASCII
+                    else: # El objeto está arriba del centro de la imagen
+                        ArduinoSerial.write(b'U') # 85 ASCII
+                    move_time = time.time()
 
         # Dibujar una flecha que indique el objeto más cercano desde centro de la imágen
         cv2.arrowedLine(frame, (x0, y0), (x, y), LineColor, 2)
-
-
         
     if False:
         
