@@ -30,18 +30,18 @@ width, height = 640, 480
 # Ruta absoluta del modelo
 nnBlobPath = MODEL_PATH
 
-labelMap = [
-            "down",
-            "emergency",
-            "emergency-forward",
-            "emergency-right",
-            "emergency-left",
-            "forward",
-            "handicapped",
-            "left",
-            "line one",
-            "line-three",
-            "right"
+etiquetaMapa = [
+            "abajo",
+            "emergencia",
+            "emergencia-hacia adelante",
+            "derecho de emergencia",
+            "emergencia-izquierda",
+            "delantero",
+            "minusválido",
+            "izquierda",
+            "línea uno",
+            "línea tres",
+            "Correcto"
         ]
 
 # Create pipeline
@@ -222,9 +222,11 @@ while True:
 
         # Calcular el objeto detectado más cercano al centro de la imágen
         x, y, index = Nearest_Coordinate((x0,y0), Centroids)
+        Nearest_label = str(labelMap[detections[index].label])
 
         # Si el centro de la imágen está dentro de la caja delimitadora del objeto más cercano
         if x1 < x0 < x2 and y1 < y0 < y2:
+            os.system('spd-say "' + Nearest_label + '"')
             ArduinoSerial.write(b'0')
         else: 
             # Calcular la distancia horizontal y vertical al objeto más cercano
