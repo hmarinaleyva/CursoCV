@@ -1,3 +1,4 @@
+from operator import index
 import serial, subprocess
 
 try: #intenta abrir el puerto serie
@@ -159,9 +160,9 @@ def distance_to_camera(detection):
     X = detection.spatialCoordinates.x
     Y = detection.spatialCoordinates.y
     Z = detection.spatialCoordinates.z
-    return math.sqrt(X * X + Y * Y + Z * Z)
+    return math.sqrt(X**2 + Y**2 + Z**2)
 
-# Calcular el centroide del bounding box más cercano a la coordenada OriginPoint
+# Determina las coordenasdas del centro del bounding box más cercano y el índice correspondiente
 def Nearest_Coordinate(OriginPoint, Centroids):
     x0, y0 = OriginPoint
     minDist = min((x-x0)**2 + (y-y0)**2 for x, y in Centroids)
@@ -237,16 +238,21 @@ while True:
             cv2.putText(frame, "{:.2f} [m]".format(distance) , (x2, y2), FontFace, FontSize, TextColor)
             cv2.rectangle(frame, (x1, y1), (x2, y2), BoxesColor, BoxesSize)
 
+        # Determina las coordenasdas del centro del bounding box más cercano y el índice correspondiente
+        x, y, i = Nearest_Coordinate((x0,y0), Centroids)
 
-        # Calcular el objeto detectado más cercano al centro de la imágen
-        x, y, index = Nearest_Coordinate((x0,y0), Centroids)
-        nearest_translated_label = str(spanishLabelMap[detections[index].label])
+        # Reasignar coordenadas (x1, x2, y1, y2) a los vértices del bounding box más cercano
+        x1, x2, y1, y2 = Vertices(detections[i])
+
+        # Traducir la etiqueta del objeto detectado y reasingarla a la variable "detection_label"
+        detection_label = str(spanishLabelMap[detections[i].label])
+
 
         # Si el centro de la imágen está dentro de la caja delimitadora del objeto más cercano
         if x1 < x0 < x2 and y1 < y0 < y2:
 
             if not mentioned_object:
-                os.system('spd-say "' + nearest_translated_label + '"')
+                os.system('spd-say "' + detection_label + '"')
                 ArduinoSerial.write(b'DLRU')
                 mentioned_object = True
 
