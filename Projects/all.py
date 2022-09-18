@@ -252,7 +252,7 @@ while True:
 
             if not mentioned_object:
                 os.system('spd-say "' + detection_label + '"')
-                ArduinoSerial.write(b'DLRU')
+                arduino_serial.write(b'DLRU')
                 mentioned_object = True
 
         else: 
@@ -264,17 +264,17 @@ while True:
 
                 if f1(time.time() - move_time) > f2(HorizontalDistance/(2*width)):
                     if (x - x0) > 0: # El objeto está a la derecha del centro de la imagen
-                        ArduinoSerial.write(b'R') # 68 ASCII
+                        arduino_serial.write(b'R') # 68 ASCII
                     else: # El objeto está a la izquierda del centro de la imagen
-                        ArduinoSerial.write(b'L') # 76 ASCII
+                        arduino_serial.write(b'L') # 76 ASCII
                     move_time = time.time()
             else:
 
                 if f1(time.time() - move_time) > f2(VerticalDistance/(2*height)):
                     if (y - y0) > 0: # El objeto está abajo del centro de la imagen
-                        ArduinoSerial.write(b'D') # 82 ASCII
+                        arduino_serial.write(b'D') # 82 ASCII
                     else: # El objeto está arriba del centro de la imagen
-                        ArduinoSerial.write(b'U') # 85 ASCII
+                        arduino_serial.write(b'U') # 85 ASCII
                     move_time = time.time()
 
             mentioned_object = False
