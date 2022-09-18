@@ -39,10 +39,10 @@ labelMap = [
             "emergency-left",
             "forward",
             "handicapped",
-            "left",
+            "right",
             "line one",
             "line-three",
-            "right"
+            "left"
         ]
 
 spanishLabelMap = [
@@ -53,10 +53,10 @@ spanishLabelMap = [
             "emergencia izquierda",
             "adelante",
             "minusválido",
-            "izquierda",
+            "derecha",
             "línea uno",
             "línea tres",
-            "derecha"
+            "izquierda"
         ]
 
 # Create pipeline
