@@ -15,7 +15,7 @@ ArduinoSerial.write(b'0123456') #enviar una cadena de bytes
 from utilities import *
 import depthai as dai
 import cv2, os, time
-import numpy as np
+
 
 # Cambiar la ruta de ejecución aquí
 MainDir = os.path.dirname(os.path.abspath(__file__))
