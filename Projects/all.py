@@ -1,4 +1,3 @@
-from operator import index
 import serial, subprocess
 
 try: #intenta abrir el puerto serie
