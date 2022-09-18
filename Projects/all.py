@@ -1,24 +1,24 @@
+from serial import serial
+
 import serial, subprocess
+from utilities import *
+import depthai as dai
+import cv2, os, time
+
+# Cambiar la ruta de ejecución aquí
+MainDir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(MainDir)
 
 try: # Intenta abrir el puerto serie
     devices = subprocess.getoutput('arduino-cli board list').strip().split("\n")[1:] 
     arduino_info = [device for device in devices if device[-11:] == 'arduino:avr'][0].split()
     arduino_port, arduino_fqbn = arduino_info[0], arduino_info[-2]
-    arduino_serial = serial.Serial(PuertoArduino, 9600, timeout=1) #abrir el puerto serie
+    arduino_serial = serial.Serial(PuertoArduino, 9600, timeout=1)
 except:
     print("No se estableció comunicación serial con una placa Arduino correctamente")
     exit()
 
-ArduinoSerial.write(b'0DLRU') #enviar una cadena de bytes
-
-from utilities import *
-import depthai as dai
-import cv2, os, time
-
-
-# Cambiar la ruta de ejecución aquí
-MainDir = os.path.dirname(os.path.abspath(__file__))
-os.chdir(MainDir)
+arduino_serial.write(b'0DLRU') #enviar una cadena de bytes
 
 # Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
 MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
