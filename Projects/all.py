@@ -1,5 +1,3 @@
-from serial import serial
-
 import serial, subprocess
 from utilities import *
 import depthai as dai
