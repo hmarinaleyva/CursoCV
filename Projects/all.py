@@ -1,7 +1,7 @@
 import serial, subprocess
 from utilities import *
 import depthai as dai
-import cv2, os, time
+import cv2, os, time, json
 
 # Cambiar la ruta de ejecución aquí
 MainDir = os.path.dirname(os.path.abspath(__file__))
@@ -12,20 +12,34 @@ try: # Intenta abrir el puerto serie
     arduino_info = [device for device in devices if device[-11:] == 'arduino:avr'][0].split()
     arduino_port, arduino_fqbn = arduino_info[0], arduino_info[-2]
     arduino_serial = serial.Serial(arduino_port, 9600, timeout=1)
+    arduino_serial.write(b'0DLRU') #enviar una cadena de bytes
 except:
     print("No se estableció comunicación serial con una placa Arduino correctamente")
-    exit()
+    #exit()
 
 
-exit()
-arduino_serial.write(b'0DLRU') #enviar una cadena de bytes
 
 # Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
 MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
 CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
 
+with open(CONFIG_PATH, 'r') as file:
+    config = json.load(file)
+
+# Extraer metadata del archivo de configuración .json
+metadata = config.get("nn_config").get("NN_specific_metadata")
+classes = metadata.get("classes")
+coordinates = metadata.get("coordinates")
+anchors = metadata.get("anchors")
+anchorMasks = metadata.get("anchor_masks")
+iouThreshold = metadata.get("iou_threshold")
+confidenceThreshold = metadata.get("confidence_threshold")
+
+# Extraer labels del archivo de configuración .json
+labels = config.get("mappings").get("labels")
+
 # Anhcho y alto de la imagen de entrada a la red neuronal
-width, height = 640, 480
+width, height = tuple(map(int, config.get("nn_config").get("input_size").split("x")))
 
 # Ruta absoluta del modelo
 nnBlobPath = MODEL_PATH
@@ -101,6 +115,7 @@ stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
 stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
 
+# Depth specific settings
 spatialDetectionNetwork.setBlobPath(nnBlobPath)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
 spatialDetectionNetwork.input.setBlocking(False)
@@ -109,10 +124,10 @@ spatialDetectionNetwork.setDepthLowerThreshold(100)
 spatialDetectionNetwork.setDepthUpperThreshold(5000)
 
 # Yolo specific parameters
-spatialDetectionNetwork.setNumClasses(11)
-spatialDetectionNetwork.setCoordinateSize(4)
-spatialDetectionNetwork.setAnchors([10.0,13.0,16.0,30.0,33.0,23.0,30.0,61.0,62.0,45.0,59.0,119.0,116.0,90.0,156.0,198.0,373.0,326.0])
-spatialDetectionNetwork.setAnchorMasks({"side80": [0,1,2], "side40": [3,4,5], "side20": [6,7,8]})
+spatialDetectionNetwork.setNumClasses(classes)
+spatialDetectionNetwork.setCoordinateSize(coordinates)
+spatialDetectionNetwork.setAnchors(anchors)
+spatialDetectionNetwork.setAnchorMasks(anchorMasks)
 spatialDetectionNetwork.setIouThreshold(0.5)
 spatialDetectionNetwork.setConfidenceThreshold(0.6)
 
