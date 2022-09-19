@@ -13,9 +13,12 @@ try: # Intenta abrir el puerto serie
     arduino_port, arduino_fqbn = arduino_info[0], arduino_info[-2]
     arduino_serial = serial.Serial(arduino_port, 9600, timeout=1)
     arduino_serial.write(b'0DLRU') #enviar una cadena de bytes
+    arduino_connected = True
+
 except:
     print("No se estableció comunicación serial con una placa Arduino correctamente")
-    #exit()
+    arduino_connected = False
+
 
 # Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
 MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
@@ -39,24 +42,7 @@ labels = config.get("mappings").get("labels")
 # Anhcho y alto de la imagen de entrada a la red neuronal
 width, height = tuple(map(int, config.get("nn_config").get("input_size").split("x")))
 
-# Ruta absoluta del modelo
-nnBlobPath = MODEL_PATH
-
-labelMap = [
-            "down",
-            "emergency",
-            "emergency-forward",
-            "emergency-right",
-            "emergency-left",
-            "forward",
-            "handicapped",
-            "right",
-            "line one",
-            "line-three",
-            "left"
-        ]
-
-spanishLabelMap = [
+translated_labels = [
             "abajo",
             "emergencia",
             "emergencia adelante",
@@ -114,7 +100,7 @@ stereo.setDepthAlign(dai.CameraBoardSocket.RGB)
 stereo.setOutputSize(monoLeft.getResolutionWidth(), monoLeft.getResolutionHeight())
 
 # Depth specific settings
-spatialDetectionNetwork.setBlobPath(nnBlobPath)
+spatialDetectionNetwork.setBlobPath(MODEL_PATH)
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
 spatialDetectionNetwork.input.setBlocking(False)
 spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
@@ -231,7 +217,7 @@ while True:
 
         for detection in detections:
 
-            detection_label = str(labelMap[detection.label])
+            detection_label = str(labels[detection.label])
             confidence = detection.confidence*100
 
             # Calcular los vertices de la caja delimitadora
@@ -257,7 +243,7 @@ while True:
         x1, x2, y1, y2 = Vertices(detections[i])
 
         # Traducir la etiqueta del objeto detectado y reasingarla a la variable "detection_label"
-        detection_label = str(spanishLabelMap[detections[i].label])
+        detection_label = str(translated_labels[detections[i].label])
 
 
         # Si el centro de la imágen está dentro de la caja delimitadora del objeto más cercano
