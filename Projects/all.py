@@ -1,7 +1,7 @@
-import serial, subprocess
+import serial, subprocess, cv2, os, time, json
 from utilities import *
 import depthai as dai
-import cv2, os, time, json
+
 
 # Cambiar la ruta de ejecución aquí
 MainDir = os.path.dirname(os.path.abspath(__file__))
@@ -12,13 +12,12 @@ try: # Intenta abrir el puerto serie
     arduino_info = [device for device in devices if device[-11:] == 'arduino:avr'][0].split()
     arduino_port, arduino_fqbn = arduino_info[0], arduino_info[-2]
     arduino_serial = serial.Serial(arduino_port, 9600, timeout=1)
-    arduino_serial.write(b'0DLRU') #enviar una cadena de bytes
-    arduino_connected = True
+    if arduino_is_connected: arduino_serial.write(b'0DLRU') #enviar una cadena de bytes
+    arduino_is_connected = True
 
 except:
     print("No se estableció comunicación serial con una placa Arduino correctamente")
-    arduino_connected = False
-
+    arduino_is_connected = False
 
 # Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
 MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
@@ -245,38 +244,39 @@ while True:
         # Traducir la etiqueta del objeto detectado y reasingarla a la variable "detection_label"
         detection_label = str(translated_labels[detections[i].label])
 
+        if arduino_is_connected:
+            
+            # Si el centro de la imágen está dentro de la caja delimitadora del objeto más cercano
+            if x1 < x0 < x2 and y1 < y0 < y2:
 
-        # Si el centro de la imágen está dentro de la caja delimitadora del objeto más cercano
-        if x1 < x0 < x2 and y1 < y0 < y2:
+                if not mentioned_object:
+                    os.system('spd-say "' + detection_label + '"')
+                    arduino_serial.write(b'DLRU')
+                    mentioned_object = True
 
-            if not mentioned_object:
-                os.system('spd-say "' + detection_label + '"')
-                arduino_serial.write(b'DLRU')
-                mentioned_object = True
+            else: 
+                # Calcular la distancia horizontal y vertical al objeto más cercano
+                HorizontalDistance = abs(x - x0)
+                VerticalDistance = abs(y - y0)
 
-        else: 
-            # Calcular la distancia horizontal y vertical al objeto más cercano
-            HorizontalDistance = abs(x - x0)
-            VerticalDistance = abs(y - y0)
+                if HorizontalDistance > VerticalDistance:
 
-            if HorizontalDistance > VerticalDistance:
+                    if f1(time.time() - move_time) > f2(HorizontalDistance/(2*width)):
+                        if (x - x0) > 0: # El objeto está a la derecha del centro de la imagen
+                            arduino_serial.write(b'R') # 68 ASCII
+                        else: # El objeto está a la izquierda del centro de la imagen
+                            arduino_serial.write(b'L') # 76 ASCII
+                        move_time = time.time()
+                else:
 
-                if f1(time.time() - move_time) > f2(HorizontalDistance/(2*width)):
-                    if (x - x0) > 0: # El objeto está a la derecha del centro de la imagen
-                        arduino_serial.write(b'R') # 68 ASCII
-                    else: # El objeto está a la izquierda del centro de la imagen
-                        arduino_serial.write(b'L') # 76 ASCII
-                    move_time = time.time()
-            else:
+                    if f1(time.time() - move_time) > f2(VerticalDistance/(2*height)):
+                        if (y - y0) > 0: # El objeto está abajo del centro de la imagen
+                            arduino_serial.write(b'D') # 82 ASCII
+                        else: # El objeto está arriba del centro de la imagen
+                            arduino_serial.write(b'U') # 85 ASCII
+                        move_time = time.time()
 
-                if f1(time.time() - move_time) > f2(VerticalDistance/(2*height)):
-                    if (y - y0) > 0: # El objeto está abajo del centro de la imagen
-                        arduino_serial.write(b'D') # 82 ASCII
-                    else: # El objeto está arriba del centro de la imagen
-                        arduino_serial.write(b'U') # 85 ASCII
-                    move_time = time.time()
-
-            mentioned_object = False
+                mentioned_object = False
 
         # Dibujar una flecha que indique el objeto más cercano desde centro de la imágen
         cv2.arrowedLine(frame, (x0, y0), (x, y), LineColor, 2)
