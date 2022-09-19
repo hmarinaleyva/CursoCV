@@ -17,8 +17,6 @@ except:
     print("No se estableció comunicación serial con una placa Arduino correctamente")
     #exit()
 
-
-
 # Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
 MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
 CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
