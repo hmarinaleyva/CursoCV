@@ -12,7 +12,7 @@ try: # Intenta abrir el puerto serie
     arduino_info = [device for device in devices if device[-11:] == 'arduino:avr'][0].split()
     arduino_port, arduino_fqbn = arduino_info[0], arduino_info[-2]
     arduino_serial = serial.Serial(arduino_port, 9600, timeout=1)
-    if arduino_is_connected: arduino_serial.write(b'0DLRU') #enviar una cadena de bytes
+    arduino_serial.write(b'0DLRU') #enviar una cadena de bytes
     arduino_is_connected = True
 
 except:
@@ -241,6 +241,9 @@ while True:
         # Reasignar coordenadas (x1, x2, y1, y2) a los vértices del bounding box más cercano
         x1, x2, y1, y2 = Vertices(detections[i])
 
+        # Calcular la distancia al bounding box más cercano
+        distance = Distance_to_camera(detections[i])
+
         # Traducir la etiqueta del objeto detectado y reasingarla a la variable "detection_label"
         detection_label = str(translated_labels[detections[i].label])
 
@@ -250,7 +253,9 @@ while True:
             if x1 < x0 < x2 and y1 < y0 < y2:
 
                 if not mentioned_object:
-                    os.system('spd-say "' + detection_label + '"')
+
+                    # Decir el nombre del objeto detectado y la distancia a la cámara al cual se encuentra
+                    os.system("spd-say '" + detection_label + str(distance) + " metros'")
                     arduino_serial.write(b'DLRU')
                     mentioned_object = True
 
