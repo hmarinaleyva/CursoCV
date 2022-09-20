@@ -12,7 +12,7 @@ try: # Intenta abrir el puerto serie
     arduino_info = [device for device in devices if device[-11:] == 'arduino:avr'][0].split()
     arduino_port, arduino_fqbn = arduino_info[0], arduino_info[-2]
     arduino_serial = serial.Serial(arduino_port, 9600, timeout=1)
-    arduino_serial.write(b'0DLRU') #enviar una cadena de bytes
+    arduino_serial.write(b'0123456789dlru') #enviar una cadena de bytes
     arduino_is_connected = True
 
 except:
@@ -256,7 +256,7 @@ while True:
 
                     # Decir el nombre del objeto detectado y la distancia a la cámara al cual se encuentra
                     os.system("spd-say '" + detection_label + str(distance) + " metros'")
-                    arduino_serial.write(b'DLRU')
+                    arduino_serial.write(b'dlru')
                     mentioned_object = True
 
             else: 
@@ -268,17 +268,17 @@ while True:
 
                     if f1(time.time() - move_time) > f2(HorizontalDistance/(2*width)):
                         if (x - x0) > 0: # El objeto está a la derecha del centro de la imagen
-                            arduino_serial.write(b'R') # 68 ASCII
+                            arduino_serial.write(b'r') # 68 ASCII
                         else: # El objeto está a la izquierda del centro de la imagen
-                            arduino_serial.write(b'L') # 76 ASCII
+                            arduino_serial.write(b'l') # 76 ASCII
                         move_time = time.time()
                 else:
 
                     if f1(time.time() - move_time) > f2(VerticalDistance/(2*height)):
                         if (y - y0) > 0: # El objeto está abajo del centro de la imagen
-                            arduino_serial.write(b'D') # 82 ASCII
+                            arduino_serial.write(b'd') # 82 ASCII
                         else: # El objeto está arriba del centro de la imagen
-                            arduino_serial.write(b'U') # 85 ASCII
+                            arduino_serial.write(b'u') # 85 ASCII
                         move_time = time.time()
 
                 mentioned_object = False
