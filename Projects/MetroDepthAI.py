@@ -1,5 +1,5 @@
 import serial, subprocess, cv2, os, time, json
-from utilities import *
+#from utilities import *
 import depthai as dai
 
 
@@ -241,6 +241,9 @@ while True:
         # Reasignar coordenadas (x1, x2, y1, y2) a los vértices del bounding box más cercano
         x1, x2, y1, y2 = Vertices(detections[i])
 
+        # Calcular la distancia al bounding box más cercano
+        distance = Distance_to_camera(detections[i])
+
         # Traducir la etiqueta del objeto detectado y reasingarla a la variable "detection_label"
         detection_label = str(translated_labels[detections[i].label])
 
@@ -250,7 +253,9 @@ while True:
             if x1 < x0 < x2 and y1 < y0 < y2:
 
                 if not mentioned_object:
-                    os.system('spd-say "' + detection_label + '"')
+
+                    # Decir el nombre del objeto detectado y la distancia a la cámara al cual se encuentra
+                    os.system("spd-say '" + detection_label + str(distance) + " metros'")
                     arduino_serial.write(b'DLRU')
                     mentioned_object = True
 
