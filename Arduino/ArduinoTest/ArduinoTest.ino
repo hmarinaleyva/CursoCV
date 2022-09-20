@@ -43,10 +43,10 @@ void loop() {
 
         // Comandos de control del la interfáz háptica {100, 108, 114, 117} => {down, left, right, up}
         if (dato == 100){ // Si el dato resivido es d (codificado en ASCII)
-            tone(PIN_RIGHT, NOTE_C3, DURATION);
+            tone(PIN_DOWN, NOTE_C3, DURATION);
         }
         if (dato == 108){ // Si el dato resivido es l (codificado en ASCII)
-            tone(PIN_DOWN, NOTE_E3, DURATION);
+            tone(PIN_LEFT, NOTE_E3, DURATION);
         }
         if (dato == 114){ // Si el dato resivido es r (codificado en ASCII)
             tone(PIN_RIGHT, NOTE_G3, DURATION);
