@@ -253,7 +253,7 @@ while True:
 
                     # Decir el nombre del objeto detectado y la distancia a la cámara al cual se encuentra
                     os.system("spd-say '" + detection_label + "{:.2f} [m]".format(distance) + " metros'")
-                    arduino_serial.write(b'dlru')
+                    arduino_serial.write(b'0')
                     mentioned_object = True
 
             else: 
