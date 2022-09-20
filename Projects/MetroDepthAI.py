@@ -1,5 +1,5 @@
 import serial, subprocess, cv2, os, time, json
-from utilities import *
+#from utilities import *
 import depthai as dai
 
 
