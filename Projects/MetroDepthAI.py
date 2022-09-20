@@ -12,7 +12,7 @@ try: # Intenta abrir el puerto serie
     arduino_info = [device for device in devices if device[-11:] == 'arduino:avr'][0].split()
     arduino_port, arduino_fqbn = arduino_info[0], arduino_info[-2]
     arduino_serial = serial.Serial(arduino_port, 9600, timeout=1)
-    if arduino_is_connected: arduino_serial.write(b'0DLRU') #enviar una cadena de bytes
+    arduino_serial.write(b'0DLRU') #enviar una cadena de bytes
     arduino_is_connected = True
 
 except:

@@ -2,10 +2,10 @@ int dato;
 
 // Decharación de pines a utilizar
 #define PIN_BUZZER  11  // Definir el pin de salida del BUZZER
-#define PIN_UP      5   // Definir el pin de salida del BUZZER
-#define PIN_DOWN    4   // Definir el pin de salida del BUZZER
-#define PIN_LEFT    3   // Definir el pin de salida del BUZZER
-#define PIN_RIGHT   2   // Definir el pin de salida del BUZZER
+#define PIN_UP      2   // Definir el pin de salida del BUZZER
+#define PIN_DOWN    3   // Definir el pin de salida del BUZZER
+#define PIN_LEFT    4   // Definir el pin de salida del BUZZER
+#define PIN_RIGHT   5   // Definir el pin de salida del BUZZER
 
 // Decharación frecuencias y duración de notas musicales a utilizar mediante el BUZZER
 #define NOTE_C3     130 // Definir la frecuencia de la nota C3 (130 Hz)
@@ -25,54 +25,6 @@ int dato;
 #define DURATION    100  // Definir la duración de las notas musicales en milisegundos
 
 
-void Bip() {
-  tone(PIN_BUZZER, NOTE_A3, DURATION); // Emite un bip de 100 milisegundos
-  delay(10); // Espera 10 milisegundos
-}
-
-
-void CMajor7_Arpeggio() {
-    tone(PIN_BUZZER, NOTE_C4, DURATION);
-    delay(DURATION);
-    tone(PIN_BUZZER, NOTE_E4, DURATION);
-    delay(DURATION);
-    tone(PIN_BUZZER, NOTE_G4, DURATION);
-    delay(DURATION);
-    tone(PIN_BUZZER, NOTE_B4, DURATION);
-}
-
-void D7_Arpeggio() {
-    tone(PIN_BUZZER, NOTE_D4, DURATION);
-    delay(DURATION);
-    tone(PIN_BUZZER, NOTE_F4, DURATION);
-    delay(DURATION);
-    tone(PIN_BUZZER, NOTE_A4, DURATION);
-    delay(DURATION);
-    tone(PIN_BUZZER, NOTE_C4, DURATION);
-}
-
-void E7_Arpeggio() {
-    tone(PIN_BUZZER, NOTE_E4, DURATION);
-    delay(DURATION);
-    tone(PIN_BUZZER, NOTE_G4, DURATION);
-    delay(DURATION);
-    tone(PIN_BUZZER, NOTE_B4, DURATION);
-    delay(DURATION);
-    tone(PIN_BUZZER, NOTE_D4, DURATION);
-}
-
-void Octave_Ascendant() {
-    tone(PIN_BUZZER, NOTE_C3, DURATION);
-    delay(DURATION);
-    tone(PIN_BUZZER, NOTE_E3, DURATION);
-}
-
-void Octave_Decendent() {
-    tone(PIN_BUZZER, NOTE_B3, DURATION);
-    delay(DURATION);
-    tone(PIN_BUZZER, NOTE_G3, DURATION);
-}
-
 void setup() {
   Serial.begin(9600, SERIAL_8N1); // opens serial port, sets data rate to 9600 bps
   pinMode(PIN_BUZZER, OUTPUT);
@@ -89,46 +41,62 @@ void loop() {
         dato = Serial.read();   // Lee el dato enviado por el puerto serie usando código ASCII
         Serial.write(dato);     // Envia el dato por el puerto serie codificado en ASCII
 
-
-        if (dato == 68){ // Si el dato resivido es R (codificado en ASCII)
-            tone(PIN_BUZZER, NOTE_C3, DURATION);
+        // Comandos de control del la interfáz háptica {100, 108, 114, 117} => {down, left, right, up}
+        if (dato == 100){ // Si el dato resivido es d (codificado en ASCII)
+            tone(PIN_RIGHT, NOTE_C3, DURATION);
+        }
+        if (dato == 108){ // Si el dato resivido es l (codificado en ASCII)
+            tone(PIN_DOWN, NOTE_E3, DURATION);
+        }
+        if (dato == 114){ // Si el dato resivido es r (codificado en ASCII)
+            tone(PIN_RIGHT, NOTE_G3, DURATION);
+        }
+        if (dato == 117){ // Si el dato resivido es u (codificado en ASCII)
+            tone(PIN_UP, NOTE_B3, DURATION);
         }
 
-        if (dato == 76){ // Si el dato resivido es D (codificado en ASCII)
-            tone(PIN_BUZZER, NOTE_E3, DURATION);
-        }
-
-        if (dato == 82){ // Si el dato resivido es D (codificado en ASCII)
-            tone(PIN_BUZZER, NOTE_G3, DURATION);
-        }
-
-        if (dato == 85){ // Si el dato resivido es U (codificado en ASCII)
-            tone(PIN_BUZZER, NOTE_B3, DURATION);
-        }
-
+        // Comandos de control del la interfáz sonora
         if (dato == 48){ // Si el dato enviado es 0 (48 codificado en ASCII) 
             tone(PIN_BUZZER, NOTE_C3, DURATION);
         }
-        
         if (dato == 49){ // Si el dato enviado es 1 (49 codificado en ASCII) 
-            tone(PIN_BUZZER, NOTE_E3, DURATION);
+            tone(PIN_BUZZER, NOTE_D3, DURATION);
         }
         if (dato == 50){ // Si el dato enviado es 2 (50 codificado en ASCII)
-            tone(PIN_BUZZER, NOTE_G3, DURATION);
+            tone(PIN_BUZZER, NOTE_E3, DURATION);
         }
-
-        // Interfaz de control háptico
         if (dato == 51){ // Si el dato enviado es 3 (51 codificado en ASCII)
-            tone(PIN_BUZZER, NOTE_B3, DURATION); // Activa el vibrador UP por 100 ms
+            tone(PIN_BUZZER, NOTE_F3, DURATION);
         }
         if (dato == 52){ // Si el dato enviado es 4 (52 codificado en ASCII)
-            tone(PIN_DOWN, 220, 100); // Activa el vibrador DOWN por 100 ms
+            tone(PIN_BUZZER, NOTE_G3, DURATION);
         }
         if (dato == 53){ // Si el dato enviado es 5 (53 codificado en ASCII)
-            tone(PIN_LEFT, 220, 100); // Activa el vibrador LEFT por 100 ms
+            tone(PIN_BUZZER, NOTE_A3, DURATION);
         }
         if (dato == 54){ // Si el dato enviado es 6 (54 codificado en ASCII)
-            tone(PIN_RIGHT, 220, 100); // Activa el vibrador RIGHT por 100 ms
+            tone(PIN_BUZZER, NOTE_B3, DURATION);
+        }
+        if (dato == 55){ // Si el dato enviado es 7 (55 codificado en ASCII)
+            tone(PIN_BUZZER, NOTE_C4, DURATION);
+        }
+        if (dato == 56){ // Si el dato enviado es 8 (56 codificado en ASCII)
+            tone(PIN_BUZZER, NOTE_D4, DURATION);
+        }
+        if (dato == 57){ // Si el dato enviado es 9 (57 codificado en ASCII)
+            tone(PIN_BUZZER, NOTE_E4, DURATION);
+        }
+        if (dato == 65){ // Si el dato enviado es A (65 codificado en ASCII)
+            tone(PIN_BUZZER, NOTE_F4, DURATION);
+        }
+        if (dato == 66){ // Si el dato enviado es B (66 codificado en ASCII)
+            tone(PIN_BUZZER, NOTE_G4, DURATION);
+        }
+        if (dato == 67){ // Si el dato enviado es C (67 codificado en ASCII)
+            tone(PIN_BUZZER, NOTE_A4, DURATION);
+        }
+        if (dato == 68){ // Si el dato enviado es D (68 codificado en ASCII)
+            tone(PIN_BUZZER, NOTE_B4, DURATION);
         }
     }
 }
