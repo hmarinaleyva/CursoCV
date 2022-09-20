@@ -17,8 +17,8 @@ except:
     arduino_is_connected = False
 
 # Ruta del modelo la configuración de la red neuronal entrenada para la deteción de objetos
-MODEL_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro_openvino_2021.4_6shave.blob")
-CONFIG_PATH = os.path.join(MainDir, '../Models/MetroModel_YOLOv5s', "Metro.json")
+MODEL_PATH = os.path.join(MainDir, '../Models/yolov5s', "yolov5s_openvino_2021.4_6shave.blob")
+CONFIG_PATH = os.path.join(MainDir, '../Models/yolov5s', "yolov5s.json")
 
 with open(CONFIG_PATH, 'r') as file:
     config = json.load(file)
@@ -38,19 +38,20 @@ labels = config.get("mappings").get("labels")
 # Anhcho y alto de la imagen de entrada a la red neuronal
 width, height = tuple(map(int, config.get("nn_config").get("input_size").split("x")))
 
-translated_labels = [
-            "abajo",
-            "emergencia",
-            "emergencia adelante",
-            "emergencia derecha",
-            "emergencia izquierda",
-            "adelante",
-            "minusválido",
-            "derecha",
-            "línea uno",
-            "línea tres",
-            "izquierda"
-        ]
+translated_labels = [        # Establecer el mapa de etiquetas de la red neuronal
+    "Persona",   "Bicicleta", "Auto",      "Moto",      "Avión",      "Autobús",     "Tren",
+    "Camión",    "Barco",     "Semáforo",  "Grifo",     "Stop",       "Parquímetro", "Banco",
+    "Pájaro",    "Gato",      "Perro",     "Caballo",   "Oveja",      "Vaca",        "Elefante",
+    "Oso",       "Cebra",     "Jirafa",    "Mochila",   "Paraguas",   "Bolso",       "Corbata",
+    "Maleta",    "Frisbee",   "Esquís",    "Snowboard", "Pelota",     "Cometa",      "Bate",
+    "Guante",    "Monopatín", "Surf",      "Raqueta",   "Botella",    "Copa",        "Taza",
+    "Tenedor",   "Cuchillo",  "Cuchara",   "Cuenco",    "Plátano",    "Manzana",     "Sándwich",
+    "Naranja",   "Brócoli",   "Zanahoria", "Hot-Hog",   "Pizza",      "Dona",        "Pastel",
+    "Silla",     "Sofá",      "Maceta",    "Cama",      "Comedor",    "Baño",        "TV",
+    "Portátil",  "Ratón",     "mando",     "Teclado",   "SmartPhone", "Microondas",  "Horno",
+    "Tostadora", "Fregadero", "Nevera",    "Libro",     "Reloj",      "Jarrón",      "Tijeras",
+    "Peluche",   "Secador",   "Cepillo"
+]
 
 # Create pipeline
 pipeline = dai.Pipeline()
