@@ -153,7 +153,7 @@ def Center(x1, x2, y1, y2):
     return x, y
 
 # Calcular la distancia de un objeto a la camara
-def distance_to_camera(detection):
+def Distance_to_camera(detection):
     X = detection.spatialCoordinates.x
     Y = detection.spatialCoordinates.y
     Z = detection.spatialCoordinates.z
@@ -227,7 +227,7 @@ while True:
             Centroids.append((x, y))
 
             # Calcular la distancia a la caja delimitadora
-            distance = distance_to_camera(detection)
+            distance = Distance_to_camera(detection)
 
             # Escribir información de la detección en el frame
             cv2.putText(frame, detection_label , (x1, y1), FontFace, FontSize, TextColor, 2)
@@ -245,7 +245,7 @@ while True:
         detection_label = str(translated_labels[detections[i].label])
 
         if arduino_is_connected:
-            
+
             # Si el centro de la imágen está dentro de la caja delimitadora del objeto más cercano
             if x1 < x0 < x2 and y1 < y0 < y2:
 
