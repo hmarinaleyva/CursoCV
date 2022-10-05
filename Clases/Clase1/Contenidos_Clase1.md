@@ -19,14 +19,15 @@
 
 Para aprobar el desafío del curso se requieren cumplir con los siguientes puntos:
 
-1. Entregar en una subcarpeta contenida en este repositorio (dentro de la carpeta `Desafios`), con todos los scripts y archivos necesarios para ejecutar el proyecto final.
-2. Exponer el proyecto al curso con una presentación de 10 minutos (máximo) con un archivo `README.md` para describir y explicar el procedimiento que se llevo a cabo.
+1. Entregar en una subcarpeta contenida en este repositorio (dentro de la carpeta `Desafios`)
 
-
+## Contenidos
+1. Modelo computacional de una imagen.
+2. Definición y arquitectura de una CNN.
+3. Filtros, convolución, pooling y flatten.
 
 ## Bibliográficas
 
 * [YOLOv7 Paper](https://github.com/WongKinYiu/yolov7/blob/main/paper/yolov7.pdf)
 * [YOLOv5 Paper](https://arxiv.org/abs/2012.08088)
 * [DataSet de imágenes](https://app.roboflow.com/bvi)
-* [Tutorial entrenamiento YOLOv7 con roboflow](https://blog.roboflow.com/yolov7-custom-dataset-training-tutorial/)
