@@ -28,3 +28,4 @@ Para aprobar el desafío del curso se requieren cumplir con los siguientes punto
 
 * [YOLOv7 Paper](https://github.com/WongKinYiu/yolov7/blob/main/paper/yolov7.pdf)
 * [YOLOv5 Paper](https://arxiv.org/abs/2012.08088)
+* [DataSet de imágenes](https://roboflow.com/)
